@@ -47,6 +47,40 @@ textarea {
   height: 80px;
 }
 
+button {
+  margin-left: 0.5em;
+  padding: 0.3em 0.8em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.btn-pdf {
+  background-color: #336699;
+  color: white;
+}
+
+.btn-edit {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.btn-archive {
+  background-color: #c7a500;
+  color: black;
+}
+
+.btn-delete {
+  background-color: #b33;
+  color: white;
+}
+
 #signature-pad {
   border: 1px solid #000;
   margin: 0.5em 0;
