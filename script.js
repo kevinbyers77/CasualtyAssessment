@@ -10,11 +10,6 @@ request.onupgradeneeded = (e) => {
   db = e.target.result;
   if (!db.objectStoreNames.contains("reports")) {
     db.createObjectStore("reports", { keyPath: "id", autoIncrement: true });
-  } else {
-    const store = e.target.transaction.objectStore("reports");
-    if (!store.indexNames.contains("archived")) {
-      // we just add archived flag support
-    }
   }
 };
 
@@ -331,3 +326,13 @@ function updateSaveStatus() {
   statusEl.textContent = isDirty ? "Not Saved" : "Saved";
   statusEl.style.color = isDirty ? "red" : "lime";
 }
+
+// -----------------------------
+// Warn on full page unload
+// -----------------------------
+window.addEventListener("beforeunload", (e) => {
+  if (isDirty) {
+    e.preventDefault();
+    e.returnValue = ""; // required for Chrome
+  }
+});
