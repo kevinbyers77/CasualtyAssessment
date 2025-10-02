@@ -316,8 +316,17 @@ function exportPDF(report) {
 // -----------------------------
 // Navigation & Save status
 // -----------------------------
+function setActiveTab(buttonText) {
+  document.querySelectorAll("nav button").forEach(btn => {
+    btn.classList.remove("active-tab");
+    if (btn.textContent === buttonText) {
+      btn.classList.add("active-tab");
+    }
+  });
+}
+
 function showForm() {
-  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  if (isDirty && !confirm(“You have unsaved changes on this report. Do you want to leave without saving?”)) return;
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "none";
@@ -325,7 +334,7 @@ function showForm() {
 }
 
 function showRecords() {
-  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  if (isDirty && !confirm(“You have unsaved changes on this report. Do you want to leave without saving?”)) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
   document.getElementById("archived-section").style.display = "none";
@@ -333,7 +342,7 @@ function showRecords() {
 }
 
 function showArchived() {
-  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  if (isDirty && !confirm(“You have unsaved changes on this report. Do you want to leave without saving?”)) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "block";
