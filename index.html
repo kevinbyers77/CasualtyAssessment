@@ -214,6 +214,56 @@
         </div>
       </fieldset>
 
+      <fieldset>
+  <legend>First Aid Treatment</legend>
+  <label for="firstAidTreatment">Treatment Details:</label>
+  <textarea id="firstAidTreatment" name="firstAidTreatment"></textarea>
+</fieldset>
+
+<fieldset>
+  <legend>Advanced Treatment</legend>
+
+  <div>
+    <label>Penthrox:</label>
+    <label><input type="radio" name="penthrox" value="Yes"> Yes</label>
+    <label><input type="radio" name="penthrox" value="No"> No</label>
+    <label><input type="checkbox" id="penthrox3ml" value="3ml"> 3ml</label>
+    <label><input type="checkbox" id="penthrox6ml" value="6ml"> 6ml</label>
+    <label>Dose 1 Time: <input type="time" id="dose1Time"></label>
+    <label>Dose 2 Time: <input type="time" id="dose2Time"></label>
+  </div>
+
+  <div>
+    <label>Oxygen:</label>
+    <label><input type="checkbox" id="oxygenYes" value="Yes"> Yes</label>
+    <label><input type="checkbox" id="oxygen8" value="8L"> 8 ltrs</label>
+    <label><input type="checkbox" id="oxygen15" value="15L"> 15 ltrs</label>
+    <label><input type="checkbox" id="oxygenResus" value="15LResus"> 15 ltrs with Resus Bag & Reservoir</label>
+  </div>
+
+  <div>
+    <label>Ventolin MDI with Spacer:</label>
+    <label><input type="radio" name="ventolin" value="Yes"> Yes</label>
+    <label><input type="radio" name="ventolin" value="No"> No</label>
+    <label>Start Time: <input type="time" id="ventolinTime"></label>
+  </div>
+
+  <div>
+    <label>Fluid/Air Injection Injury Times:</label>
+    <label>Hand Unit Contacted: <input type="time" id="handUnitTime"></label>
+    <label>Aero Med Services Contacted: <input type="time" id="aeroMedTime"></label>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Evacuation</legend>
+  <label><input type="checkbox" class="evac" value="Return"> Return to work after first aid</label>
+  <label><input type="checkbox" class="evac" value="GP"> General Practitioner</label>
+  <label><input type="checkbox" class="evac" value="Home"> Gone home</label>
+  <label><input type="checkbox" class="evac" value="Ambulance"> Ambulance</label>
+  <label><input type="checkbox" class="evac" value="Helicopter"> Helicopter</label>
+</fieldset>
+      
       <!-- Vitals -->
       <fieldset>
         <legend>Vitals</legend>
