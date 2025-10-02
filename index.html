@@ -9,7 +9,10 @@
 </head>
 <body>
   <header>
-    <h1>Casualty Assessment Report <span id="save-status">Saved</span></h1>
+    <h1>
+      Casualty Assessment Report 
+      <span id="save-status" style="font-size: 0.6em; margin-left: 1em;"></span>
+    </h1>
     <nav>
       <button onclick="showForm()">New Report</button>
       <button onclick="showRecords()">Saved Reports</button>
@@ -17,37 +20,55 @@
     </nav>
   </header>
 
-  <!-- New/Edit Form -->
-  <div id="form-section" style="display:block;">
+  <!-- Report Form -->
+  <section id="form-section" style="display: none;">
     <form id="casualty-form">
-      <label>Patient Name: <input type="text" id="patientName"></label>
-      <label>Date of Birth: <input type="date" id="dob"></label>
+      <label>
+        Patient Name:
+        <input type="text" id="patientName" required>
+      </label>
+
+      <label>
+        Date of Birth:
+        <input type="date" id="dob">
+      </label>
+
       <fieldset>
         <legend>Vitals</legend>
-        <label>Heart Rate: <input type="text" id="heartRate"></label>
-        <label>Blood Pressure: <input type="text" id="bloodPressure"></label>
+        <label>
+          Heart Rate:
+          <input type="text" id="heartRate">
+        </label>
+        <label>
+          Blood Pressure:
+          <input type="text" id="bloodPressure">
+        </label>
       </fieldset>
-      <label>Treatment Notes: <textarea id="treatment"></textarea></label>
-      <label>Signature:</label>
-      <canvas id="signature-pad"></canvas>
+
+      <label>
+        Treatment Notes:
+        <textarea id="treatment"></textarea>
+      </label>
+
       <label for="signature-pad">Signature:</label>
-<canvas id="signature-pad"></canvas>
-<button type="button" id="clear-signature" class="btn-clear">Clear Signature</button>
-      <button type="submit" disabled>Save Report</button>
+      <canvas id="signature-pad"></canvas>
+      <button type="button" id="clear-signature" class="btn-clear">Clear Signature</button>
+
+      <button type="submit">Save Report</button>
     </form>
-  </div>
+  </section>
 
   <!-- Active Reports -->
-  <div id="records-section" style="display:none; padding:1em;">
+  <section id="records-section" style="display: none;">
     <h2>Active Reports</h2>
     <ul id="records-list"></ul>
-  </div>
+  </section>
 
   <!-- Archived Reports -->
-  <div id="archived-section" style="display:none; padding:1em;">
+  <section id="archived-section" style="display: none;">
     <h2>Archived Reports</h2>
     <ul id="archived-list"></ul>
-  </div>
+  </section>
 
   <script src="script.js"></script>
 </body>
