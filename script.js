@@ -248,6 +248,11 @@ function editReport(id) {
     };
     img.src = report.signature;
 
+    // Hook up clear signature button
+document.getElementById("clear-signature").addEventListener("click", () => {
+  clearSignature();
+});
+
     currentEditId = report.id;
     existingCreated = report.created;
     showForm();
