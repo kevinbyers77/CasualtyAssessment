@@ -28,22 +28,57 @@ form.addEventListener("submit", (e) => {
 // Signature pad
 const canvas = document.getElementById("signature-pad");
 const ctx = canvas.getContext("2d");
+
+// Scale properly for high-DPI screens (Retina, phones, etc.)
+function resizeCanvas() {
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * ratio;
+  canvas.height = canvas.offsetHeight * ratio;
+  ctx.scale(ratio, ratio);
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
 let drawing = false;
 
-canvas.addEventListener("mousedown", () => (drawing = true));
-canvas.addEventListener("mouseup", () => (drawing = false));
-canvas.addEventListener("mousemove", draw);
-
-function draw(e) {
-  if (!drawing) return;
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "black";
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+function getPos(e) {
+  if (e.touches && e.touches[0]) {
+    return { x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+             y: e.touches[0].clientY - canvas.getBoundingClientRect().top };
+  } else {
+    return { x: e.offsetX, y: e.offsetY };
+  }
 }
+
+canvas.addEventListener("mousedown", (e) => {
+  drawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener("mouseup", () => (drawing = false));
+canvas.addEventListener("mousemove", (e) => {
+  if (!drawing) return;
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+});
+
+// Touch support (for phones)
+canvas.addEventListener("touchstart", (e) => {
+  drawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener("touchend", () => (drawing = false));
+canvas.addEventListener("touchmove", (e) => {
+  if (!drawing) return;
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  e.preventDefault();
+}, { passive: false });
 
 function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
