@@ -235,7 +235,8 @@ function editReport(id) {
     currentEditId = report.id;
     existingCreated = report.created;
     showForm();
-    isDirty = false;
+
+    isDirty = false;           // ✅ mark clean when opening
     updateSaveStatus();
   };
 }
@@ -313,18 +314,27 @@ function showForm() {
   if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
+  updateSaveStatus();
 }
 
 function showRecords() {
   if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
+  updateSaveStatus();
 }
 
 function updateSaveStatus() {
   const statusEl = document.getElementById("save-status");
-  statusEl.textContent = isDirty ? "Not Saved" : "Saved";
-  statusEl.style.color = isDirty ? "red" : "lime";
+
+  // Only show on form screen
+  if (document.getElementById("form-section").style.display === "block") {
+    statusEl.textContent = isDirty ? "Not Saved" : "Saved";
+    statusEl.style.color = isDirty ? "red" : "lime";
+    statusEl.style.display = "inline";
+  } else {
+    statusEl.style.display = "none";
+  }
 }
 
 // -----------------------------
