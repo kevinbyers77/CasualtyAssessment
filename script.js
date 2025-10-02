@@ -16,6 +16,34 @@ request.onsuccess = (e) => {
   loadRecords();
 };
 
+function editReport(id) {
+  const tx = db.transaction("reports", "readonly");
+  const store = tx.objectStore("reports");
+  const req = store.get(id);
+
+  req.onsuccess = () => {
+    const report = req.result;
+    if (!report) return;
+
+    document.getElementById("patientName").value = report.patientName;
+    document.getElementById("dob").value = report.dob;
+    document.getElementById("heartRate").value = report.heartRate;
+    document.getElementById("bloodPressure").value = report.bloodPressure;
+    document.getElementById("treatment").value = report.treatment;
+
+    // Load signature back into canvas
+    const img = new Image();
+    img.onload = () => {
+      clearSignature();
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+    img.src = report.signature;
+
+    currentEditId = report.id;
+    showForm();
+  };
+}
+
 request.onerror = (e) => {
   console.error("IndexedDB error:", e);
 };
@@ -146,6 +174,10 @@ function loadRecords() {
       const btn = document.createElement("button");
       btn.textContent = "Export PDF";
       btn.onclick = () => exportPDF(report);
+      
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.onclick = () => editReport(report.id);
 
       li.appendChild(btn);
       list.appendChild(li);
