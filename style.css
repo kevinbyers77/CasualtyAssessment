@@ -45,8 +45,10 @@ textarea {
   border: 1px solid #000;
   margin: 0.5em 0;
   background: #fff;
+  width: 300px;
+  height: 120px;
+  display: block;
 }
-
 #signature-pad {
   border: 1px solid #000;
   margin: 0.5em 0;
