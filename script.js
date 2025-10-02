@@ -81,54 +81,65 @@ function getObservations() {
 
 // -------------------- BODY DIAGRAMS --------------------
 
-const injuryCodes = ["A","L","B","P","S","O","Am","C","T","D","E"];
-
-function initDiagram(canvasId, view) {
+function initDiagram(canvasId, view, imgSrc) {
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
   const markers = [];
+  const img = new Image();
+
+  img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  img.src = imgSrc;
+
+  function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    markers.forEach(m => {
+      ctx.fillStyle = "black";
+      ctx.font = "14px Arial";
+      ctx.fillText(m.code, m.x, m.y);
+    });
+  }
 
   canvas.addEventListener("click", (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const code = prompt("Enter injury code (" + injuryCodes.join(", ") + "):");
-    if (code && injuryCodes.includes(code)) {
-      markers.push({x, y, code});
-      drawMarkers();
+    // Create dropdown dynamically
+    const dropdown = document.createElement("select");
+    injuryCodes.forEach(code => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = code;
+      dropdown.appendChild(opt);
+    });
+
+    dropdown.style.position = "absolute";
+    dropdown.style.left = `${e.clientX}px`;
+    dropdown.style.top = `${e.clientY}px`;
+    document.body.appendChild(dropdown);
+
+    dropdown.addEventListener("change", () => {
+      markers.push({x, y, code: dropdown.value});
+      redraw();
+      dropdown.remove();
       isDirty = true;
       updateSaveStatus();
-    }
-
-    function drawMarkers() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      markers.forEach(m => {
-        ctx.fillStyle = "black";
-        ctx.font = "14px Arial";
-        ctx.fillText(m.code, m.x, m.y);
-      });
-    }
+    });
   });
 
   return {
     get: () => markers,
-    set: (arr) => {
-      markers.length = 0;
-      arr.forEach(m => markers.push(m));
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      markers.forEach(m => {
-        ctx.fillStyle="black";
-        ctx.font="14px Arial";
-        ctx.fillText(m.code, m.x, m.y);
-      });
-    }
+    set: (arr) => { markers.length = 0; arr.forEach(m => markers.push(m)); redraw(); },
+    undo: () => { markers.pop(); redraw(); }
   };
 }
 
-const frontDiagram = initDiagram("diagram-front", "front");
-const backDiagram = initDiagram("diagram-back", "back");
+const frontDiagram = initDiagram("diagram-front", "front", "docs/front.png");
+const backDiagram  = initDiagram("diagram-back", "back", "docs/back.png");
+
+document.getElementById("undo-front").addEventListener("click", () => frontDiagram.undo());
+document.getElementById("undo-back").addEventListener("click", () => backDiagram.undo());
 
 // -------------------- SIGNATURE --------------------
 
