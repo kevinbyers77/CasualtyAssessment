@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Casualty Assessment Report</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -9,45 +10,42 @@
 <body>
   <header>
     <h1>Casualty Assessment Report <span id="save-status">Saved</span></h1>
-   <nav>
-  <button onclick="showForm()">New Report</button>
-  <button onclick="showRecords()">Saved Reports</button>
-  <button onclick="showArchived()">Archived Reports</button>
-</nav>
+    <nav>
+      <button onclick="showForm()">New Report</button>
+      <button onclick="showRecords()">Saved Reports</button>
+      <button onclick="showArchived()">Archived Reports</button>
+    </nav>
   </header>
 
-  <section id="form-section">
+  <!-- New/Edit Form -->
+  <div id="form-section" style="display:block;">
     <form id="casualty-form">
+      <label>Patient Name: <input type="text" id="patientName"></label>
+      <label>Date of Birth: <input type="date" id="dob"></label>
       <fieldset>
-        <label>Patient Name <input type="text" id="patientName"></label>
-        <label>Date of Birth <input type="date" id="dob"></label>
-        <label>Heart Rate <input type="text" id="heartRate"></label>
-        <label>Blood Pressure <input type="text" id="bloodPressure"></label>
-        <label>Treatment Notes <textarea id="treatment"></textarea></label>
+        <legend>Vitals</legend>
+        <label>Heart Rate: <input type="text" id="heartRate"></label>
+        <label>Blood Pressure: <input type="text" id="bloodPressure"></label>
       </fieldset>
-
-      <fieldset>
-        <label>Signature</label>
-        <canvas id="signature-pad" width="300" height="120"></canvas>
-        <button type="button" onclick="clearSignature()">Clear Signature</button>
-      </fieldset>
-
-      <button type="submit">Save Report</button>
+      <label>Treatment Notes: <textarea id="treatment"></textarea></label>
+      <label>Signature:</label>
+      <canvas id="signature-pad"></canvas>
+      <button type="submit" disabled>Save Report</button>
     </form>
-  </section>
+  </div>
 
-  <section id="records-section" style="display:none;">
+  <!-- Active Reports -->
+  <div id="records-section" style="display:none; padding:1em;">
     <h2>Active Reports</h2>
     <ul id="records-list"></ul>
+  </div>
+
+  <!-- Archived Reports -->
+  <div id="archived-section" style="display:none; padding:1em;">
     <h2>Archived Reports</h2>
     <ul id="archived-list"></ul>
-  </section>
+  </div>
 
-<div id="archived-section" style="display:none; padding:1em;">
-  <h2>Archived Reports</h2>
-  <ul id="archived-list"></ul>
-</div>
-  
   <script src="script.js"></script>
 </body>
 </html>
