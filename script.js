@@ -33,26 +33,23 @@ form.addEventListener("submit", (e) => {
   updateSaveStatus();
 });
 
-// Mark form dirty on input
 form.addEventListener("input", () => {
   isDirty = true;
   updateSaveStatus();
 });
 
 // -----------------------------
-// Signature pad setup
+// Signature pad
 // -----------------------------
 const canvas = document.getElementById("signature-pad");
 const ctx = canvas.getContext("2d");
 
+// Fixed size canvas, no scaling
 function resizeCanvas() {
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = canvas.offsetWidth * ratio;
-  canvas.height = canvas.offsetHeight * ratio;
-  ctx.scale(ratio, ratio);
+  canvas.width = 300;
+  canvas.height = 120;
 }
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
 
 let drawing = false;
 
@@ -111,7 +108,7 @@ function clearSignature() {
   updateSaveStatus();
 }
 
-// Hook up clear signature button
+// Clear Signature button
 document.getElementById("clear-signature").addEventListener("click", () => {
   clearSignature();
 });
@@ -129,6 +126,7 @@ function saveReport() {
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
     signature,
+    signatureName: document.getElementById("signature-name").value, // NEW
     created: currentEditId ? existingCreated : new Date().toISOString(),
     updated: currentEditId ? new Date().toISOString() : null,
     archived: false
@@ -178,35 +176,29 @@ function loadRecords() {
       const li = document.createElement("li");
       li.textContent = `${report.patientName} (Created: ${report.created})`;
 
-      // Button group container
       const buttonGroup = document.createElement("div");
       buttonGroup.className = "button-group";
 
-      // Export PDF
       const exportBtn = document.createElement("button");
       exportBtn.textContent = "Export PDF";
       exportBtn.className = "btn-pdf";
       exportBtn.onclick = () => exportPDF(report);
 
-      // Edit
       const editBtn = document.createElement("button");
       editBtn.textContent = "Edit";
       editBtn.className = "btn-edit";
       editBtn.onclick = () => editReport(report.id);
 
-      // Archive/Unarchive
       const archiveBtn = document.createElement("button");
       archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
       archiveBtn.className = "btn-archive";
       archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
 
-      // Delete
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.className = "btn-delete";
       deleteBtn.onclick = () => deleteReport(report.id);
 
-      // Add buttons to group
       buttonGroup.appendChild(exportBtn);
       buttonGroup.appendChild(editBtn);
       buttonGroup.appendChild(archiveBtn);
@@ -214,7 +206,6 @@ function loadRecords() {
 
       li.appendChild(buttonGroup);
 
-      // Append report to the correct list
       if (report.archived) {
         archivedList.appendChild(li);
       } else {
@@ -245,6 +236,7 @@ function editReport(id) {
     document.getElementById("heartRate").value = report.heartRate;
     document.getElementById("bloodPressure").value = report.bloodPressure;
     document.getElementById("treatment").value = report.treatment;
+    document.getElementById("signature-name").value = report.signatureName || "";
 
     const img = new Image();
     img.onload = () => {
@@ -257,7 +249,7 @@ function editReport(id) {
     existingCreated = report.created;
     showForm();
 
-    isDirty = false; // mark clean when opening
+    isDirty = false;
     updateSaveStatus();
   };
 }
@@ -279,7 +271,7 @@ function deleteReport(id) {
 }
 
 // -----------------------------
-// Archive/Unarchive report
+// Archive/Unarchive
 // -----------------------------
 function toggleArchive(id, newStatus) {
   const tx = db.transaction("reports", "readwrite");
@@ -319,17 +311,20 @@ function exportPDF(report) {
   if (report.signature) {
     doc.text("Signature:", 10, 130);
     doc.addImage(report.signature, "PNG", 40, 120, 50, 25);
+    if (report.signatureName) {
+      doc.text(`Name: ${report.signatureName}`, 10, 155);
+    }
   }
 
   if (report.updated) {
-    doc.text(`Last Updated: ${report.updated}`, 10, 160);
+    doc.text(`Last Updated: ${report.updated}`, 10, 170);
   }
 
   doc.save(`casualty_report_${report.patientName}.pdf`);
 }
 
 // -----------------------------
-// Navigation & unsaved handling
+// Navigation
 // -----------------------------
 function handleUnsavedLeave() {
   if (isDirty) {
