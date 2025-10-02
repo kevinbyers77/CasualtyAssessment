@@ -111,6 +111,11 @@ function clearSignature() {
   updateSaveStatus();
 }
 
+// Hook up clear signature button
+document.getElementById("clear-signature").addEventListener("click", () => {
+  clearSignature();
+});
+
 // -----------------------------
 // Save report
 // -----------------------------
@@ -248,11 +253,6 @@ function editReport(id) {
     };
     img.src = report.signature;
 
-    // Hook up clear signature button
-document.getElementById("clear-signature").addEventListener("click", () => {
-  clearSignature();
-});
-
     currentEditId = report.id;
     existingCreated = report.created;
     showForm();
@@ -329,8 +329,25 @@ function exportPDF(report) {
 }
 
 // -----------------------------
-// Navigation & highlighting
+// Navigation & unsaved handling
 // -----------------------------
+function handleUnsavedLeave() {
+  if (isDirty) {
+    if (confirm("You have unsaved changes on this report. Do you want to leave without saving?")) {
+      form.reset();
+      clearSignature();
+      currentEditId = null;
+      existingCreated = null;
+      isDirty = false;
+      updateSaveStatus();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 function setActiveTab(tabName) {
   const buttons = document.querySelectorAll("nav button");
   buttons.forEach(btn => btn.classList.remove("active-tab"));
@@ -349,7 +366,7 @@ function setActiveTab(tabName) {
 }
 
 function showForm() {
-  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  if (!handleUnsavedLeave()) return;
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "none";
@@ -358,10 +375,7 @@ function showForm() {
 }
 
 function showRecords() {
-  // Only warn if leaving form
-  if (isDirty && document.getElementById("form-section").style.display === "block" &&
-      !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
-
+  if (!handleUnsavedLeave()) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
   document.getElementById("archived-section").style.display = "none";
@@ -370,10 +384,7 @@ function showRecords() {
 }
 
 function showArchived() {
-  // Only warn if leaving form
-  if (isDirty && document.getElementById("form-section").style.display === "block" &&
-      !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
-
+  if (!handleUnsavedLeave()) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "block";
@@ -385,13 +396,10 @@ function updateSaveStatus() {
   const statusEl = document.getElementById("save-status");
   const saveBtn = document.querySelector("#casualty-form button[type='submit']");
 
-  // Only show status on form screen
   if (document.getElementById("form-section").style.display === "block") {
     statusEl.textContent = isDirty ? "Not Saved" : "Saved";
     statusEl.style.color = isDirty ? "red" : "lime";
     statusEl.style.display = "inline";
-
-    // Enable save button only when dirty
     saveBtn.disabled = !isDirty;
   } else {
     statusEl.style.display = "none";
@@ -404,6 +412,6 @@ function updateSaveStatus() {
 window.addEventListener("beforeunload", (e) => {
   if (isDirty) {
     e.preventDefault();
-    e.returnValue = ""; // required for Chrome
+    e.returnValue = "";
   }
 });
