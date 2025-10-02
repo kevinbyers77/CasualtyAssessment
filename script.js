@@ -111,6 +111,7 @@ function clearSignature() {
 function saveReport() {
   const signature = canvas.toDataURL();
 
+  // Build report object
   const report = {
     patientName: document.getElementById("patientName").value,
     dob: document.getElementById("dob").value,
@@ -119,15 +120,19 @@ function saveReport() {
     treatment: document.getElementById("treatment").value,
     signature,
     created: currentEditId ? existingCreated : new Date().toISOString(),
-    updated: currentEditId ? new Date().toISOString() : null,
-    id: currentEditId || undefined
+    updated: currentEditId ? new Date().toISOString() : null
   };
+
+  // If editing, keep the ID
+  if (currentEditId) {
+    report.id = currentEditId;
+  }
 
   const tx = db.transaction("reports", "readwrite");
   const store = tx.objectStore("reports");
 
   if (currentEditId) {
-    store.put(report); // update existing record
+    store.put(report); // update existing
   } else {
     store.add(report); // new record
   }
@@ -141,7 +146,6 @@ function saveReport() {
     loadRecords();
   };
 }
-
 // -----------------------------
 // Load saved records
 // -----------------------------
