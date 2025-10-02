@@ -97,7 +97,7 @@ function collectObservations(){
 /***********************
  * BODY DIAGRAMS (CANVAS)
  ***********************/
-const INJURY_CODES = ["Select an injury...","A","L","B","P","S","O","Am","C","T","D","E"];
+const INJURY_CODES = ["Select...","A","L","B","P","S","O","Am","C","T","D","E"];
 
 function initDiagram(canvasId, wrapperId, imgSrc){
   const wrap = document.getElementById(wrapperId);
@@ -115,53 +115,50 @@ function initDiagram(canvasId, wrapperId, imgSrc){
   picker.className = "btn-outline";
   picker.style.position = "absolute";
   picker.style.display = "none";
-  INJURY_CODES.forEach(code => {
-    const opt = document.createElement("option");
-    opt.value = code; opt.textContent = code; picker.appendChild(opt);
+  INJURY_CODES.forEach(code=>{
+    const opt=document.createElement("option");
+    opt.value=code; opt.textContent=code; picker.appendChild(opt);
   });
   wrap.appendChild(picker);
 
   picker.addEventListener("change", ()=>{
-    if(picker.style.display === "none" || picker.value === "Select an injury...") return;
-    const x = parseFloat(picker.dataset.x), y = parseFloat(picker.dataset.y);
-    markers.push({x,y,code: picker.value});
-    picker.style.display = "none";
+    if(picker.style.display==="none"||picker.value==="Select...") return;
+    const x=parseFloat(picker.dataset.x), y=parseFloat(picker.dataset.y);
+    markers.push({x,y,code:picker.value});
+    picker.style.display="none";
     redraw();
     markDirty();
   });
 
   function clickHandler(e){
-    const r = canvas.getBoundingClientRect();
-    const x = e.clientX - r.left;
-    const y = e.clientY - r.top;
-    picker.style.left = `${x - 16}px`;
-    picker.style.top  = `${y - 10}px`;
-    picker.dataset.x = x.toString();
-    picker.dataset.y = y.toString();
-    picker.value = "Select an injury...";
-    picker.style.display = "block";
+    const r=canvas.getBoundingClientRect();
+    const x=e.clientX-r.left;
+    const y=e.clientY-r.top;
+    picker.style.left=`${x-16}px`; picker.style.top=`${y-10}px`;
+    picker.dataset.x=x.toString(); picker.dataset.y=y.toString();
+    picker.value="Select...";
+    picker.style.display="block";
     picker.focus();
   }
   canvas.addEventListener("click", clickHandler);
 
   function redraw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    ctx.fillStyle="black";
-    ctx.font="14px Arial";
-    markers.forEach(m => ctx.fillText(m.code, m.x, m.y));
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    ctx.fillStyle="black"; ctx.font="14px Arial";
+    markers.forEach(m=>ctx.fillText(m.code,m.x,m.y));
   }
 
   return {
-    get: ()=> markers.slice(),
+    get: ()=>markers.slice(),
     set: (arr=[])=>{ markers.splice(0,markers.length,...arr); redraw(); },
     undo: ()=>{ markers.pop(); redraw(); markDirty(); },
     redraw
   };
 }
 
-const frontDiagram = initDiagram("diagram-front", "front-wrap", "front.png");
-const backDiagram  = initDiagram("diagram-back",  "back-wrap",  "back.png");
+const frontDiagram = initDiagram("diagram-front","front-wrap","front.png");
+const backDiagram  = initDiagram("diagram-back","back-wrap","back.png");
 
 /***********************
  * SAVE / LOAD REPORT
@@ -193,7 +190,7 @@ function saveReport(){
     signsOfLife: document.getElementById("signsOfLife").value,
     observations: collectObservations(),
     diagramFront: frontDiagram.get(),
-    diagramBack:  backDiagram.get(),
+    diagramBack: backDiagram.get(),
     fluidInjury: document.querySelector("input[name='fluidInjury']:checked")?.value || "",
     breathSounds: Array.from(document.querySelectorAll("input[name='breathSounds']:checked")).map(cb=>cb.value),
     remember: document.querySelector("input[name='remember']:checked")?.value || "",
@@ -208,28 +205,30 @@ function saveReport(){
     heartRate: document.getElementById("heartRate").value,
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
-    signature: sigCanvas.toDataURL(),
-    signerName: document.getElementById("signerName").value,
-
-    // NEW FIELDS
-    firstAidTreatment: document.getElementById("firstAidTreatment").value,
-    penthrox: document.querySelector("input[name='penthrox']:checked")?.value || "No",
-    penthrox3ml: document.getElementById("penthrox3ml")?.checked || false,
-    penthrox6ml: document.getElementById("penthrox6ml")?.checked || false,
-    dose1Time: document.getElementById("dose1Time").value,
-    dose2Time: document.getElementById("dose2Time").value,
-    oxygen: {
-      yes: document.getElementById("oxygenYes")?.checked || false,
-      eight: document.getElementById("oxygen8")?.checked || false,
-      fifteen: document.getElementById("oxygen15")?.checked || false,
-      resus: document.getElementById("oxygenResus")?.checked || false
-    },
-    ventolin: document.querySelector("input[name='ventolin']:checked")?.value || "No",
+    // NEW advanced treatment
+    penthYes: document.getElementById("penthYes").checked,
+    penth3: document.getElementById("penth3").checked,
+    penth6: document.getElementById("penth6").checked,
+    penthNo: document.getElementById("penthNo").checked,
+    penthDose1: document.getElementById("penthDose1").value,
+    penthDose2: document.getElementById("penthDose2").value,
+    oxygenYes: document.getElementById("oxygenYes").checked,
+    oxygen8: document.getElementById("oxygen8").checked,
+    oxygen15: document.getElementById("oxygen15").checked,
+    oxygen15Resus: document.getElementById("oxygen15Resus").checked,
+    oxygenNo: document.getElementById("oxygenNo").checked,
+    ventolinYes: document.getElementById("ventolinYes").checked,
+    ventolinNo: document.getElementById("ventolinNo").checked,
     ventolinTime: document.getElementById("ventolinTime").value,
     handUnitTime: document.getElementById("handUnitTime").value,
-    aeroMedTime: document.getElementById("aeroMedTime").value,
-    evacuation: Array.from(document.querySelectorAll(".evac:checked")).map(cb=>cb.value),
-
+    aeroTime: document.getElementById("aeroTime").value,
+    evacReturn: document.getElementById("evacReturn").checked,
+    evacGP: document.getElementById("evacGP").checked,
+    evacHome: document.getElementById("evacHome").checked,
+    evacAmb: document.getElementById("evacAmb").checked,
+    evacHeli: document.getElementById("evacHeli").checked,
+    signature: sigCanvas.toDataURL(),
+    signerName: document.getElementById("signerName").value,
     created: new Date().toISOString(),
     archived: false
   };
@@ -242,76 +241,53 @@ function saveReport(){
     form.reset();
     sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
     frontDiagram.set([]); backDiagram.set([]);
-    currentEditId = null; isDirty = false; updateSaveStatus();
-    loadRecords();
-    showRecords();
+    currentEditId=null; isDirty=false; updateSaveStatus();
+    loadRecords(); showRecords();
   };
 }
 
+/***********************
+ * EDIT REPORT
+ ***********************/
 function editReport(id){
-  const tx = db.transaction("reports","readonly");
-  tx.objectStore("reports").get(id).onsuccess = (ev)=>{
-    const r = ev.target.result; if(!r) return;
-    currentEditId = r.id;
+  const tx=db.transaction("reports","readonly");
+  tx.objectStore("reports").get(id).onsuccess=(ev)=>{
+    const r=ev.target.result; if(!r) return;
+    currentEditId=r.id;
 
     ["patientName","dob","gender","injuryDate","injuryTime","homeAddress","town","state","postcode","employeeNo","contractor","occupation","shiftStart","injuryLocation"]
-      .forEach(k=>{ const el=document.getElementById(k); if(el) el.value = r[k]||""; });
+      .forEach(k=>{const el=document.getElementById(k); if(el) el.value=r[k]||"";});
 
-    document.getElementById("history").value = r.history||"";
-    if(r.recurring==="Yes"){ document.querySelector("input[name='recurring'][value='Yes']").checked=true; toggleRecurring(true); document.getElementById("recurringDate").value=r.recurringDate||""; }
-    else { document.querySelector("input[name='recurring'][value='No']").checked=true; toggleRecurring(false); }
+    document.getElementById("history").value=r.history||"";
+    if(r.recurring==="Yes"){document.querySelector("input[name='recurring'][value='Yes']").checked=true; toggleRecurring(true); document.getElementById("recurringDate").value=r.recurringDate||"";}
+    else{document.querySelector("input[name='recurring'][value='No']").checked=true; toggleRecurring(false);}
 
-    document.getElementById("danger").checked = !!r.danger;
-    ["response","airway","breathing","signsOfLife"].forEach(k=>{ const el=document.getElementById(k); if(el) el.value=r[k]||""; });
+    document.getElementById("danger").checked=!!r.danger;
+    ["response","airway","breathing","signsOfLife"].forEach(k=>{const el=document.getElementById(k); if(el) el.value=r[k]||"";});
 
     document.querySelector("#observations-table tbody").innerHTML="";
     (r.observations||[]).forEach(row=>addObservationRow(row));
 
-    frontDiagram.set(r.diagramFront||[]);
-    backDiagram.set(r.diagramBack||[]);
-
-    if(r.fluidInjury){ document.querySelector(`input[name='fluidInjury'][value='${r.fluidInjury}']`)?.click(); }
-    document.querySelectorAll("input[name='breathSounds']").forEach(cb=> cb.checked = (r.breathSounds||[]).includes(cb.value));
+    frontDiagram.set(r.diagramFront||[]); backDiagram.set(r.diagramBack||[]);
+    if(r.fluidInjury) document.querySelector(`input[name='fluidInjury'][value='${r.fluidInjury}']`)?.click();
+    document.querySelectorAll("input[name='breathSounds']").forEach(cb=>cb.checked=(r.breathSounds||[]).includes(cb.value));
 
     if(r.remember) document.querySelector(`input[name='remember'][value='${r.remember}']`)?.click();
-    document.getElementById("hurtMost").value = r.hurtMost||"";
-    document.getElementById("painRating").value = r.painRating||"";
+    document.getElementById("hurtMost").value=r.hurtMost||"";
+    document.getElementById("painRating").value=r.painRating||"";
     if(r.deepBreath) document.querySelector(`input[name='deepBreath'][value='${r.deepBreath}']`)?.click();
 
     if(r.allergies) document.querySelector(`input[name='allergies'][value='${r.allergies}']`)?.click();
-    document.getElementById("allergyDetails").value = r.allergyDetails||"";
-    document.querySelectorAll(".illness").forEach(chk=> chk.checked = (r.illnesses||[]).includes(chk.value) );
+    document.getElementById("allergyDetails").value=r.allergyDetails||"";
+    document.querySelectorAll(".illness").forEach(chk=>chk.checked=(r.illnesses||[]).includes(chk.value));
 
-    ["regularMeds","todayMeds","heartRate","bloodPressure","treatment","signerName"].forEach(k=>{ const el=document.getElementById(k); if(el) el.value = r[k]||""; });
+    ["regularMeds","todayMeds","heartRate","bloodPressure","treatment","signerName","penthDose1","penthDose2","ventolinTime","handUnitTime","aeroTime"].forEach(k=>{const el=document.getElementById(k); if(el) el.value=r[k]||"";});
+    ["penthYes","penth3","penth6","penthNo","oxygenYes","oxygen8","oxygen15","oxygen15Resus","oxygenNo","ventolinYes","ventolinNo","evacReturn","evacGP","evacHome","evacAmb","evacHeli"].forEach(k=>{const el=document.getElementById(k); if(el) el.checked=!!r[k];});
 
-    if(r.signature){
-      const img=new Image();
-      img.onload=()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigCtx.drawImage(img,0,0,sigCanvas.width,sigCanvas.height); };
-      img.src = r.signature;
-    } else { sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); }
+    if(r.signature){const img=new Image(); img.onload=()=>{sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigCtx.drawImage(img,0,0,sigCanvas.width,sigCanvas.height);}; img.src=r.signature;}
+    else{sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);}
 
-    // NEW FIELDS reload
-    document.getElementById("firstAidTreatment").value = r.firstAidTreatment || "";
-    if(r.penthrox) document.querySelector(`input[name='penthrox'][value='${r.penthrox}']`).checked = true;
-    document.getElementById("penthrox3ml").checked = r.penthrox3ml || false;
-    document.getElementById("penthrox6ml").checked = r.penthrox6ml || false;
-    document.getElementById("dose1Time").value = r.dose1Time || "";
-    document.getElementById("dose2Time").value = r.dose2Time || "";
-
-    if(r.oxygen){
-      document.getElementById("oxygenYes").checked = r.oxygen.yes || false;
-      document.getElementById("oxygen8").checked = r.oxygen.eight || false;
-      document.getElementById("oxygen15").checked = r.oxygen.fifteen || false;
-      document.getElementById("oxygenResus").checked = r.oxygen.resus || false;
-    }
-
-    if(r.ventolin) document.querySelector(`input[name='ventolin'][value='${r.ventolin}']`).checked = true;
-    document.getElementById("ventolinTime").value = r.ventolinTime || "";
-    document.getElementById("handUnitTime").value = r.handUnitTime || "";
-    document.getElementById("aeroMedTime").value = r.aeroMedTime || "";
-    document.querySelectorAll(".evac").forEach(cb => cb.checked = (r.evacuation||[]).includes(cb.value));
-
-    isDirty = false; updateSaveStatus(); showForm();
+    isDirty=false; updateSaveStatus(); showForm();
   };
 }
 
@@ -319,14 +295,35 @@ function editReport(id){
  * LISTS / ACTIONS
  ***********************/
 function loadRecords(){
-  const active = document.getElementById("records-list");
-  const arch   = document.getElementById("archived-list");
-  active.innerHTML = ""; arch.innerHTML = "";
+  const active=document.getElementById("records-list");
+  const arch=document.getElementById("archived-list");
+  active.innerHTML=""; arch.innerHTML="";
 
-  const tx = db.transaction("reports","readonly");
-  tx.objectStore("reports").openCursor().onsuccess = (e)=>{
-    const cursor = e.target.result;
-    if(!cursor) return;
-    const r = cursor.value;
+  const tx=db.transaction("reports","readonly");
+  tx.objectStore("reports").openCursor().onsuccess=(e)=>{
+    const cursor=e.target.result; if(!cursor) return;
+    const r=cursor.value;
 
-    const li
+    const li=document.createElement("li");
+    li.textContent=`${r.patientName||"(no name)"} (Created: ${r.created})`;
+
+    const btnPDF=document.createElement("button");
+    btnPDF.className="btn-pdf"; btnPDF.textContent="Export PDF"; btnPDF.onclick=()=>exportPDF(r);
+
+    const btnEdit=document.createElement("button");
+    btnEdit.className="btn-edit"; btnEdit.textContent="Edit"; btnEdit.onclick=()=>editReport(r.id);
+
+    const btnArch=document.createElement("button");
+    btnArch.className="btn-archive"; btnArch.textContent=r.archived?"Unarchive":"Archive";
+    btnArch.onclick=()=>toggleArchive(r.id,!r.archived);
+
+    const btnDel=document.createElement("button");
+    btnDel.className="btn-delete"; btnDel.textContent="Delete";
+    btnDel.onclick=()=>{if(confirm("Delete this report?")) deleteReport(r.id);};
+
+    li.append(btnPDF,btnEdit,btnArch,btnDel);
+    (r.archived?arch:active).appendChild(li);
+    cursor.continue();
+  };
+}
+function toggle
