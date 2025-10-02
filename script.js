@@ -1,3 +1,5 @@
+let currentEditId = null;
+
 // IndexedDB setup
 let db;
 const request = indexedDB.open("casualtyDB", 1);
@@ -94,7 +96,6 @@ function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// Save report
 function saveReport() {
   const signature = canvas.toDataURL();
 
@@ -106,16 +107,23 @@ function saveReport() {
     treatment: document.getElementById("treatment").value,
     signature,
     created: new Date().toISOString(),
+    id: currentEditId || undefined  // keep id if editing
   };
 
   const tx = db.transaction("reports", "readwrite");
   const store = tx.objectStore("reports");
-  store.add(report);
+
+  if (currentEditId) {
+    store.put(report); // update existing record
+  } else {
+    store.add(report); // new record
+  }
 
   tx.oncomplete = () => {
-    alert("Report saved!");
+    alert(currentEditId ? "Report updated!" : "Report saved!");
     form.reset();
     clearSignature();
+    currentEditId = null;
     loadRecords();
   };
 }
