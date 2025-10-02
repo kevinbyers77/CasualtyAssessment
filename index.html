@@ -2,49 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Casualty Report PWA</title>
+  <title>Casualty Assessment Report</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>Casualty Assessment Report</h1>
+    <h1>Casualty Assessment Report <span id="save-status">Saved</span></h1>
     <nav>
       <button onclick="showForm()">New Report</button>
       <button onclick="showRecords()">Saved Reports</button>
     </nav>
   </header>
 
-  <!-- Form Section -->
   <section id="form-section">
     <form id="casualty-form">
-      <label>Patient Name: <input type="text" id="patientName" required></label>
-      <label>Date of Birth: <input type="date" id="dob"></label>
-
       <fieldset>
-        <legend>Vitals</legend>
-        <label>Heart Rate: <input type="number" id="heartRate"></label>
-        <label>Blood Pressure: <input type="text" id="bloodPressure"></label>
+        <label>Patient Name <input type="text" id="patientName"></label>
+        <label>Date of Birth <input type="date" id="dob"></label>
+        <label>Heart Rate <input type="text" id="heartRate"></label>
+        <label>Blood Pressure <input type="text" id="bloodPressure"></label>
+        <label>Treatment Notes <textarea id="treatment"></textarea></label>
       </fieldset>
 
-      <label>Treatment Notes:</label>
-      <textarea id="treatment"></textarea>
-
-      <label>Signature:</label>
-      <canvas id="signature-pad" width="300" height="150"></canvas>
-      <button type="button" onclick="clearSignature()">Clear Signature</button>
+      <fieldset>
+        <label>Signature</label>
+        <canvas id="signature-pad" width="300" height="120"></canvas>
+        <button type="button" onclick="clearSignature()">Clear Signature</button>
+      </fieldset>
 
       <button type="submit">Save Report</button>
     </form>
   </section>
 
-  <!-- Records Section -->
   <section id="records-section" style="display:none;">
-    <h2>Saved Reports</h2>
+    <h2>Active Reports</h2>
     <ul id="records-list"></ul>
+    <h2>Archived Reports</h2>
+    <ul id="archived-list"></ul>
   </section>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
