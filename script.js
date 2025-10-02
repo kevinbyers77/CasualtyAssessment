@@ -97,7 +97,7 @@ function collectObservations(){
 /***********************
  * BODY DIAGRAMS (CANVAS)
  ***********************/
-const INJURY_CODES = ["A","L","B","P","S","O","Am","C","T","D","E"];
+const INJURY_CODES = ["Select an injury...","A","L","B","P","S","O","Am","C","T","D","E"];
 
 function initDiagram(canvasId, wrapperId, imgSrc){
   const wrap = document.getElementById(wrapperId);
@@ -111,32 +111,20 @@ function initDiagram(canvasId, wrapperId, imgSrc){
   img.onload = ()=> redraw();
   img.src = "docs/" + imgSrc;
 
-  // Dropdown (created once, positioned per click)
   const picker = document.createElement("select");
   picker.className = "btn-outline";
   picker.style.position = "absolute";
   picker.style.display = "none";
-
-  // ✅ Add placeholder
-  const placeholder = document.createElement("option");
-  placeholder.textContent = "Select an injury...";
-  placeholder.disabled = true;
-  placeholder.selected = true;
-  picker.appendChild(placeholder);
-
   INJURY_CODES.forEach(code => {
     const opt = document.createElement("option");
-    opt.value = code;
-    opt.textContent = code;
-    picker.appendChild(opt);
+    opt.value = code; opt.textContent = code; picker.appendChild(opt);
   });
   wrap.appendChild(picker);
 
   picker.addEventListener("change", ()=>{
     if(picker.style.display === "none" || picker.value === "Select an injury...") return;
     const x = parseFloat(picker.dataset.x), y = parseFloat(picker.dataset.y);
-    const code = picker.value;
-    markers.push({x,y,code});
+    markers.push({x,y,code: picker.value});
     picker.style.display = "none";
     redraw();
     markDirty();
@@ -175,18 +163,15 @@ function initDiagram(canvasId, wrapperId, imgSrc){
 const frontDiagram = initDiagram("diagram-front", "front-wrap", "front.png");
 const backDiagram  = initDiagram("diagram-back",  "back-wrap",  "back.png");
 
-
 /***********************
  * SAVE / LOAD REPORT
  ***********************/
 function saveReport(){
   const report = {
     id: currentEditId || undefined,
-    // patient
     patientName: document.getElementById("patientName").value,
     dob: document.getElementById("dob").value,
     gender: document.getElementById("gender").value,
-    // injury info
     injuryDate: document.getElementById("injuryDate").value,
     injuryTime: document.getElementById("injuryTime").value,
     homeAddress: document.getElementById("homeAddress").value,
@@ -198,41 +183,53 @@ function saveReport(){
     occupation: document.getElementById("occupation").value,
     shiftStart: document.getElementById("shiftStart").value,
     injuryLocation: document.getElementById("injuryLocation").value,
-    // history
     history: document.getElementById("history").value,
     recurring: document.querySelector("input[name='recurring']:checked")?.value || "No",
     recurringDate: document.getElementById("recurringDate").value,
-    // primary
     danger: document.getElementById("danger").checked,
     response: document.getElementById("response").value,
     airway: document.getElementById("airway").value,
     breathing: document.getElementById("breathing").value,
     signsOfLife: document.getElementById("signsOfLife").value,
-    // observations
     observations: collectObservations(),
-    // secondary
     diagramFront: frontDiagram.get(),
     diagramBack:  backDiagram.get(),
     fluidInjury: document.querySelector("input[name='fluidInjury']:checked")?.value || "",
     breathSounds: Array.from(document.querySelectorAll("input[name='breathSounds']:checked")).map(cb=>cb.value),
-    // questions
     remember: document.querySelector("input[name='remember']:checked")?.value || "",
     hurtMost: document.getElementById("hurtMost").value,
     painRating: document.getElementById("painRating").value,
     deepBreath: document.querySelector("input[name='deepBreath']:checked")?.value || "",
-    // allergies/illnesses/meds
     allergies: document.querySelector("input[name='allergies']:checked")?.value || "No",
     allergyDetails: document.getElementById("allergyDetails").value,
     illnesses: Array.from(document.querySelectorAll(".illness:checked")).map(x=>x.value),
     regularMeds: document.getElementById("regularMeds").value,
     todayMeds: document.getElementById("todayMeds").value,
-    // vitals/treatment/signature
     heartRate: document.getElementById("heartRate").value,
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
     signature: sigCanvas.toDataURL(),
     signerName: document.getElementById("signerName").value,
-    // metadata
+
+    // NEW FIELDS
+    firstAidTreatment: document.getElementById("firstAidTreatment").value,
+    penthrox: document.querySelector("input[name='penthrox']:checked")?.value || "No",
+    penthrox3ml: document.getElementById("penthrox3ml")?.checked || false,
+    penthrox6ml: document.getElementById("penthrox6ml")?.checked || false,
+    dose1Time: document.getElementById("dose1Time").value,
+    dose2Time: document.getElementById("dose2Time").value,
+    oxygen: {
+      yes: document.getElementById("oxygenYes")?.checked || false,
+      eight: document.getElementById("oxygen8")?.checked || false,
+      fifteen: document.getElementById("oxygen15")?.checked || false,
+      resus: document.getElementById("oxygenResus")?.checked || false
+    },
+    ventolin: document.querySelector("input[name='ventolin']:checked")?.value || "No",
+    ventolinTime: document.getElementById("ventolinTime").value,
+    handUnitTime: document.getElementById("handUnitTime").value,
+    aeroMedTime: document.getElementById("aeroMedTime").value,
+    evacuation: Array.from(document.querySelectorAll(".evac:checked")).map(cb=>cb.value),
+
     created: new Date().toISOString(),
     archived: false
   };
@@ -257,51 +254,62 @@ function editReport(id){
     const r = ev.target.result; if(!r) return;
     currentEditId = r.id;
 
-    // patient/injury
     ["patientName","dob","gender","injuryDate","injuryTime","homeAddress","town","state","postcode","employeeNo","contractor","occupation","shiftStart","injuryLocation"]
       .forEach(k=>{ const el=document.getElementById(k); if(el) el.value = r[k]||""; });
 
-    // history
     document.getElementById("history").value = r.history||"";
     if(r.recurring==="Yes"){ document.querySelector("input[name='recurring'][value='Yes']").checked=true; toggleRecurring(true); document.getElementById("recurringDate").value=r.recurringDate||""; }
     else { document.querySelector("input[name='recurring'][value='No']").checked=true; toggleRecurring(false); }
 
-    // primary
     document.getElementById("danger").checked = !!r.danger;
     ["response","airway","breathing","signsOfLife"].forEach(k=>{ const el=document.getElementById(k); if(el) el.value=r[k]||""; });
 
-    // observations
     document.querySelector("#observations-table tbody").innerHTML="";
     (r.observations||[]).forEach(row=>addObservationRow(row));
 
-    // diagrams
     frontDiagram.set(r.diagramFront||[]);
     backDiagram.set(r.diagramBack||[]);
 
-    // secondary extra
     if(r.fluidInjury){ document.querySelector(`input[name='fluidInjury'][value='${r.fluidInjury}']`)?.click(); }
     document.querySelectorAll("input[name='breathSounds']").forEach(cb=> cb.checked = (r.breathSounds||[]).includes(cb.value));
 
-    // questions
     if(r.remember) document.querySelector(`input[name='remember'][value='${r.remember}']`)?.click();
     document.getElementById("hurtMost").value = r.hurtMost||"";
     document.getElementById("painRating").value = r.painRating||"";
     if(r.deepBreath) document.querySelector(`input[name='deepBreath'][value='${r.deepBreath}']`)?.click();
 
-    // allergies/illnesses
     if(r.allergies) document.querySelector(`input[name='allergies'][value='${r.allergies}']`)?.click();
     document.getElementById("allergyDetails").value = r.allergyDetails||"";
     document.querySelectorAll(".illness").forEach(chk=> chk.checked = (r.illnesses||[]).includes(chk.value) );
 
-    // meds/vitals/treatment
     ["regularMeds","todayMeds","heartRate","bloodPressure","treatment","signerName"].forEach(k=>{ const el=document.getElementById(k); if(el) el.value = r[k]||""; });
 
-    // signature
     if(r.signature){
       const img=new Image();
       img.onload=()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigCtx.drawImage(img,0,0,sigCanvas.width,sigCanvas.height); };
       img.src = r.signature;
     } else { sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); }
+
+    // NEW FIELDS reload
+    document.getElementById("firstAidTreatment").value = r.firstAidTreatment || "";
+    if(r.penthrox) document.querySelector(`input[name='penthrox'][value='${r.penthrox}']`).checked = true;
+    document.getElementById("penthrox3ml").checked = r.penthrox3ml || false;
+    document.getElementById("penthrox6ml").checked = r.penthrox6ml || false;
+    document.getElementById("dose1Time").value = r.dose1Time || "";
+    document.getElementById("dose2Time").value = r.dose2Time || "";
+
+    if(r.oxygen){
+      document.getElementById("oxygenYes").checked = r.oxygen.yes || false;
+      document.getElementById("oxygen8").checked = r.oxygen.eight || false;
+      document.getElementById("oxygen15").checked = r.oxygen.fifteen || false;
+      document.getElementById("oxygenResus").checked = r.oxygen.resus || false;
+    }
+
+    if(r.ventolin) document.querySelector(`input[name='ventolin'][value='${r.ventolin}']`).checked = true;
+    document.getElementById("ventolinTime").value = r.ventolinTime || "";
+    document.getElementById("handUnitTime").value = r.handUnitTime || "";
+    document.getElementById("aeroMedTime").value = r.aeroMedTime || "";
+    document.querySelectorAll(".evac").forEach(cb => cb.checked = (r.evacuation||[]).includes(cb.value));
 
     isDirty = false; updateSaveStatus(); showForm();
   };
@@ -321,103 +329,4 @@ function loadRecords(){
     if(!cursor) return;
     const r = cursor.value;
 
-    const li = document.createElement("li");
-    li.textContent = `${r.patientName || "(no name)"} (Created: ${r.created})`;
-
-    const btnPDF = document.createElement("button");
-    btnPDF.className="btn-pdf"; btnPDF.textContent="Export PDF"; btnPDF.onclick=()=>exportPDF(r);
-
-    const btnEdit = document.createElement("button");
-    btnEdit.className="btn-edit"; btnEdit.textContent="Edit"; btnEdit.onclick=()=>editReport(r.id);
-
-    const btnArch = document.createElement("button");
-    btnArch.className="btn-archive"; btnArch.textContent = r.archived ? "Unarchive" : "Archive";
-    btnArch.onclick=()=>toggleArchive(r.id,!r.archived);
-
-    const btnDel = document.createElement("button");
-    btnDel.className="btn-delete"; btnDel.textContent="Delete";
-    btnDel.onclick=()=>{ if(confirm("Delete this report?")) deleteReport(r.id); };
-
-    li.append(btnPDF, btnEdit, btnArch, btnDel);
-    (r.archived ? arch : active).appendChild(li);
-
-    cursor.continue();
-  };
-}
-
-function toggleArchive(id, toArchive){
-  const tx = db.transaction("reports","readwrite");
-  const store = tx.objectStore("reports");
-  store.get(id).onsuccess = (e)=>{
-    const r = e.target.result; if(!r) return;
-    r.archived = toArchive;
-    store.put(r).onsuccess = loadRecords;
-  };
-}
-
-function deleteReport(id){
-  const tx = db.transaction("reports","readwrite");
-  tx.objectStore("reports").delete(id).onsuccess = loadRecords;
-}
-
-/***********************
- * EXPORT (simple summary for now)
- ***********************/
-function exportPDF(report){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFontSize(16);
-  doc.text("Casualty Assessment Report", 10, 16);
-  doc.setFontSize(11);
-
-  const lines = [
-    `Patient: ${report.patientName || ""}`,
-    `DOB: ${report.dob || ""}   Gender: ${report.gender || ""}`,
-    `Injury: ${report.injuryDate || ""} ${report.injuryTime || ""}`,
-    `Location: ${report.injuryLocation || ""}`,
-    `Heart Rate: ${report.heartRate || ""}   BP: ${report.bloodPressure || ""}`,
-    `History: ${report.history || ""}`,
-    `Recurring: ${report.recurring || ""}  Original: ${report.recurringDate || ""}`,
-    `Fluid/Air Injection Injury: ${report.fluidInjury || ""}`,
-    `Breath Sounds: ${(report.breathSounds||[]).join(", ")}`,
-    `Pain rating: ${report.painRating || ""}  Deep breath: ${report.deepBreath || ""}`,
-    `Allergies: ${report.allergies || ""}  ${report.allergyDetails || ""}`,
-    `Illnesses: ${(report.illnesses||[]).join(", ")}`,
-    `Regular meds: ${report.regularMeds || ""}`,
-    `Meds today: ${report.todayMeds || ""}`
-  ];
-  let y = 26;
-  lines.forEach(l=>{ doc.text(l, 10, y); y+=6; });
-
-  if(report.signature){
-    doc.text("Signature:", 10, y+6);
-    doc.addImage(report.signature, "PNG", 30, y, 50, 25);
-  }
-  doc.save(`casualty_report_${(report.patientName||"").replace(/\s+/g,'_')}.pdf`);
-}
-
-/***********************
- * NAVIGATION
- ***********************/
-function showForm(){ if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
-  document.getElementById("form-section").style.display="block";
-  document.getElementById("records-section").style.display="none";
-  document.getElementById("archived-section").style.display="none";
-  setActiveTab("btn-new"); updateSaveStatus();
-}
-function showRecords(){ if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
-  document.getElementById("form-section").style.display="none";
-  document.getElementById("records-section").style.display="block";
-  document.getElementById("archived-section").style.display="none";
-  setActiveTab("btn-saved"); updateSaveStatus();
-}
-function showArchived(){ if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
-  document.getElementById("form-section").style.display="none";
-  document.getElementById("records-section").style.display="none";
-  document.getElementById("archived-section").style.display="block";
-  setActiveTab("btn-archived"); updateSaveStatus();
-}
-
-// initial UI
-setActiveTab("btn-saved");
-updateSaveStatus();
+    const li
