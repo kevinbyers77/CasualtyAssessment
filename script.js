@@ -160,8 +160,13 @@ function loadRecords() {
       editBtn.textContent = "Edit";
       editBtn.onclick = () => editReport(report.id);
 
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = () => deleteReport(report.id);
+
       li.appendChild(exportBtn);
       li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
       list.appendChild(li);
 
       cursor.continue();
@@ -199,6 +204,22 @@ function editReport(id) {
     existingCreated = report.created;
     showForm(); // switch back to form view
   };
+}
+
+// -----------------------------
+// Delete report
+// -----------------------------
+function deleteReport(id) {
+  if (confirm("Are you sure you want to delete this report? This action cannot be undone.")) {
+    const tx = db.transaction("reports", "readwrite");
+    const store = tx.objectStore("reports");
+    store.delete(id);
+
+    tx.oncomplete = () => {
+      alert("Report deleted.");
+      loadRecords();
+    };
+  }
 }
 
 // -----------------------------
