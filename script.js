@@ -49,11 +49,13 @@ window.addEventListener("resize", resizeCanvas);
 // Expand signature pad when clicked/tapped
 canvas.addEventListener("click", () => {
   canvas.classList.add("expanded");
+  resizeCanvas(); // re-scale coordinates after expand
 });
 
 // Collapse if double-clicked (or tapped twice quickly)
 canvas.addEventListener("dblclick", () => {
   canvas.classList.remove("expanded");
+  resizeCanvas(); // re-scale coordinates after collapse
 });
 
 let drawing = false;
