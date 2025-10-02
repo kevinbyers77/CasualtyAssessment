@@ -99,3 +99,9 @@ button:disabled {
   background-color: #b33;
   color: white;
 }
+
+nav button.active-tab {
+  background-color: #555;   /* muted gray highlight */
+  color: #fff;
+  font-weight: bold;
+}
