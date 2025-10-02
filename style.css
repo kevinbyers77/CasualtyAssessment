@@ -49,20 +49,6 @@ textarea {
   height: 120px;
   display: block;
 }
-#signature-pad {
-  border: 1px solid #000;
-  margin: 0.5em 0;
-  background: #fff;
-  width: 300px;
-  height: 50px;       /* collapsed height */
-  display: block;
-  cursor: pointer;
-  transition: height 0.3s ease;
-}
-
-#signature-pad.expanded {
-  height: 150px;      /* expanded height */
-}
 
 #records-list {
   list-style: none;
