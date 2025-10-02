@@ -358,7 +358,10 @@ function showForm() {
 }
 
 function showRecords() {
-  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  // Only warn if leaving form
+  if (isDirty && document.getElementById("form-section").style.display === "block" &&
+      !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
   document.getElementById("archived-section").style.display = "none";
@@ -367,7 +370,10 @@ function showRecords() {
 }
 
 function showArchived() {
-  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  // Only warn if leaving form
+  if (isDirty && document.getElementById("form-section").style.display === "block" &&
+      !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "block";
