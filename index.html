@@ -17,12 +17,13 @@
   </header>
 
   <!-- Report Form -->
-  <section id="form-section" style="display: none;">
+  <section id="form-section" style="display:none;">
     <form id="casualty-form">
+
       <!-- Patient Info -->
       <fieldset>
         <legend>Patient Info</legend>
-        <label>Patient Name: <input type="text" id="patientName" required></label>
+        <label>Patient Name: <input type="text" id="patientName"></label>
         <label>Date of Birth: <input type="date" id="dob"></label>
         <label>Gender:
           <select id="gender">
@@ -41,7 +42,7 @@
           <label>Time of Injury: <input type="time" id="injuryTime"></label>
         </div>
         <div class="row">
-          <label>Home Address: <input type="text" id="homeAddress" placeholder="Street"></label>
+          <label>Home Address: <input type="text" id="homeAddress"></label>
           <label>Town: <input type="text" id="town"></label>
         </div>
         <div class="row">
@@ -63,8 +64,8 @@
       <fieldset>
         <legend>History of Injury/Illness</legend>
         <div class="help-text">
-    What job was being done? Environmental conditions? Who witnessed? How did the injury occur?
-  </div>
+          What job was being done? Environmental conditions? Who witnessed? How did the injury occur?
+        </div>
         <textarea id="history"></textarea>
         <label>Recurring Injury?
           <input type="radio" name="recurring" value="Yes" onclick="toggleRecurring(true)"> Yes
@@ -73,6 +74,129 @@
         <div id="recurringDateField" style="display:none;">
           <label>Date of Original Injury: <input type="date" id="recurringDate"></label>
         </div>
+      </fieldset>
+
+      <!-- Primary Assessment -->
+      <fieldset>
+        <legend>Primary Assessment</legend>
+        <label>Danger: <input type="checkbox" id="danger"></label>
+        <label>Response:
+          <select id="response">
+            <option value="">-- Select --</option>
+            <option>Conscious</option>
+            <option>Semi-conscious</option>
+            <option>Unconscious</option>
+          </select>
+        </label>
+        <label>HELP: 
+          <input type="checkbox" id="help000"> 000 
+          <input type="checkbox" id="help112"> 112
+        </label>
+        <label>Airway:
+          <select id="airway">
+            <option value="">-- Select --</option>
+            <option>Clear</option>
+            <option>Obstructed</option>
+            <option>Guedel</option>
+          </select>
+        </label>
+        <label>Breathing:
+          <select id="breathing">
+            <option value="">-- Select --</option>
+            <option>Normal</option>
+            <option>Abnormal</option>
+            <option>Absent</option>
+          </select>
+        </label>
+        <label>Signs of Life:
+          <select id="signsOfLife">
+            <option value="">-- Select --</option>
+            <option>Pink</option>
+            <option>Pale</option>
+            <option>Cyanosed</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <!-- Casualty Observations -->
+      <fieldset>
+        <legend>Casualty Observations</legend>
+        <table id="observations-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Pulse</th>
+              <th>BP</th>
+              <th>Breaths/min</th>
+              <th>GCS</th>
+              <th>Pupil L</th>
+              <th>Pupil R</th>
+              <th>React L</th>
+              <th>React R</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" onclick="addObservationRow()">Add Row</button>
+      </fieldset>
+
+      <!-- Secondary Assessment -->
+      <fieldset>
+        <legend>Secondary Assessment</legend>
+        <h4>Body Diagrams</h4>
+        <div class="row">
+          <canvas id="diagram-front" width="200" height="400"></canvas>
+          <canvas id="diagram-back" width="200" height="400"></canvas>
+        </div>
+        <div class="help-text">
+          <strong>Key:</strong> A=Abrasion, L=Laceration, B=Bleeding, P=Pain, S=Swelling, O=Open Fracture,
+          Am=Amputation, C=Contusion, T=Tenderness, D=Deformity, E=Embedded Object
+        </div>
+      </fieldset>
+
+      <!-- Key Questions -->
+      <fieldset>
+        <legend>Key Questions</legend>
+        <label>Can you remember what happened? 
+          <input type="radio" name="remember" value="Yes"> Yes
+          <input type="radio" name="remember" value="No"> No
+        </label>
+        <label>Where does it hurt most? <input type="text" id="hurtMost"></label>
+        <label>Pain rating (1–10): <input type="number" id="painRating" min="1" max="10"></label>
+        <label>Can you take a deep breath? 
+          <input type="radio" name="deepBreath" value="Yes"> Yes
+          <input type="radio" name="deepBreath" value="No"> No
+        </label>
+      </fieldset>
+
+      <!-- Allergies -->
+      <fieldset>
+        <legend>Allergies</legend>
+        <label>
+          <input type="radio" name="allergies" value="No"> No
+          <input type="radio" name="allergies" value="Yes"> Yes
+        </label>
+        <input type="text" id="allergyDetails" placeholder="If yes, specify">
+      </fieldset>
+
+      <!-- Previous Illness -->
+      <fieldset>
+        <legend>Previous Illness</legend>
+        <label><input type="checkbox" value="Cardiac" class="illness"> Cardiac</label>
+        <label><input type="checkbox" value="Diabetes" class="illness"> Diabetes</label>
+        <label><input type="checkbox" value="Epilepsy" class="illness"> Epilepsy</label>
+        <label><input type="checkbox" value="Respiratory" class="illness"> Respiratory</label>
+        <label><input type="checkbox" value="Hypertension" class="illness"> Hypertension</label>
+        <label><input type="checkbox" value="Renal" class="illness"> Renal</label>
+        <label><input type="checkbox" value="Stroke" class="illness"> Stroke</label>
+        <label><input type="checkbox" value="Psychological" class="illness"> Psychological</label>
+      </fieldset>
+
+      <!-- Medications -->
+      <fieldset>
+        <legend>Medications</legend>
+        <label>Regular medications: <textarea id="regularMeds"></textarea></label>
+        <label>Medications taken today: <textarea id="todayMeds"></textarea></label>
       </fieldset>
 
       <!-- Vitals -->
@@ -102,13 +226,13 @@
   </section>
 
   <!-- Saved Reports -->
-  <section id="records-section" style="display: none;">
+  <section id="records-section" style="display:none;">
     <h2>Active Reports</h2>
     <ul id="records-list"></ul>
   </section>
 
   <!-- Archived Reports -->
-  <section id="archived-section" style="display: none;">
+  <section id="archived-section" style="display:none;">
     <h2>Archived Reports</h2>
     <ul id="archived-list"></ul>
   </section>
