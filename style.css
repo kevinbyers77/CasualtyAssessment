@@ -1,194 +1,75 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+/* Base */
+:root{
+  --blue:#003366;
+  --muted:#555;
+  --btn-blue:#336699;
+  --btn-green:#2e7d32;
+  --btn-yellow:#c7a500;
+  --btn-red:#b33;
+  --border:#d6d6d6;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111}
+header{background:var(--blue);color:#fff;padding:1rem}
+header h1{margin:0}
+#save-status{margin-left:0.5rem;font-size:.9rem}
+
+nav button{
+  margin:.5rem .5rem .5rem 0;
+  padding:.5rem 1rem;
+  border:none;border-radius:6px;cursor:pointer;
+}
+nav button.active-tab{background:#445; color:#fff; font-weight:600}
+
+section{padding:1rem}
+fieldset{border:1px solid var(--border);padding:1rem;margin:1rem 0}
+legend{font-weight:700}
+label{display:flex;flex-direction:column;gap:.25rem;margin:.5rem 0}
+
+textarea{width:100%;min-height:90px}
+.row{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.row .grow{flex:1}
+.help-text{font-size:.9rem;color:#555;margin:.25rem 0 .5rem}
+
+/* Lists (records) */
+#records-list,#archived-list{list-style:none;padding:0;margin:0}
+#records-list li,#archived-list li{
+  display:flex;align-items:center;justify-content:flex-start;
+  gap:.5rem;padding:.5rem 0;border-bottom:1px solid #eee;
 }
 
-header {
-  background: #003366;
-  color: #fff;
-  padding: 1em;
-}
+/* Buttons */
+button{border:none;border-radius:6px;padding:.4rem .8rem;cursor:pointer}
+.btn-primary{background:var(--btn-green);color:#fff}
+.btn-outline{background:#f5f5f5;color:#222;border:1px solid #ccc}
+.btn-pdf{background:var(--btn-blue);color:#fff}
+.btn-archive{background:var(--btn-yellow);color:#000}
+.btn-edit{background:var(--btn-green);color:#fff}
+.btn-delete{background:var(--btn-red);color:#fff;margin-left:1rem}
 
-header h1 {
-  margin: 0;
-}
+/* Pill grid for illnesses */
+.pill-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+.pill-grid label{border:1px solid #ddd;padding:.3rem .6rem;border-radius:999px;flex:none}
 
-nav button {
-  margin: 0.5em;
-  padding: 0.5em 1em;
-  font-size: 1em;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* Observations */
+#observations-table{width:100%;border-collapse:collapse}
+#observations-table th,#observations-table td{
+  border:1px solid #eee;padding:.35rem;text-align:left
 }
+#observations-table td:last-child{text-align:center}
 
-nav button.active-tab {
-  background-color: #555;   /* muted highlight */
-  color: #fff;
-  font-weight: bold;
+/* Secondary Assessment layout */
+.injury-section{
+  display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap
 }
+.injury-key{flex:1 1 240px}
+.injury-key ul{margin:.25rem 0 0 1rem}
+.injury-diagrams{flex:2 1 480px;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.diagram{position:relative;text-align:center}
+.diagram canvas{display:block;border:1px solid #ccc;background:#fff}
+.diagram-controls{margin-top:.4rem}
+.diagram-label{margin-top:.25rem;color:#555;font-size:.9rem}
+.injury-extra{margin-top:1rem}
 
-form {
-  display: flex;
-  flex-direction: column;
-  padding: 1em;
-}
-
-label {
-  margin: 0.5em 0;
-}
-
-fieldset {
-  border: 1px solid #ccc;
-  padding: 1em;
-  margin: 1em 0;
-}
-
-legend {
-  font-weight: bold;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
-}
-
-/* Group rows of inputs */
-.row {
-  display: flex;
-  gap: 1em;
-  margin-bottom: 0.5em;
-}
-
-.row label {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Signature */
-#signature-pad {
-  border: 1px solid #000;
-  margin: 0.5em 0;
-  background: #fff;
-  width: 300px;
-  height: 120px;
-  display: block;
-}
-
-/* Record lists */
-#records-list,
-#archived-list {
-  list-style: none;
-  padding: 0;
-}
-
-#records-list li,
-#archived-list li {
-  border-bottom: 1px solid #ddd;
-  padding: 0.5em;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-/* Buttons general */
-button {
-  margin-left: 0.5em;
-  padding: 0.3em 0.8em;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
-/* Button colors */
-.btn-pdf {
-  background-color: #336699;
-  color: white;
-}
-
-.btn-edit {
-  background-color: #2e7d32;
-  color: white;
-}
-
-.btn-archive {
-  background-color: #c7a500;
-  color: black;
-}
-
-.btn-delete {
-  background-color: #b33;
-  color: white;
-  margin-left: 1.5em;   /* extra spacing from others */
-}
-
-.btn-clear {
-  background-color: #888;
-  color: white;
-}
-
-.btn-clear:hover {
-  background-color: #666;
-}
-
-/* Save status */
-#save-status {
-  margin-left: 1em;
-  font-size: 0.9em;
-}
-
-/* Recurring toggle */
-#recurringDateField {
-  margin-top: 0.5em;
-}
-
-/* Signature section buttons */
-.button-row {
-  margin-top: 0.5em;
-  display: flex;
-  gap: 1em;
-}
-
-.help-text {
-  font-size: 0.9em;
-  color: #555;
-  margin-bottom: 0.3em;
-}
-
-.injury-section {
-  display: flex;
-  justify-content: space-between;
-  gap: 2em;
-}
-
-.injury-key {
-  flex: 1;
-}
-
-.injury-diagrams {
-  flex: 2;
-  display: flex;
-  justify-content: center;
-  gap: 2em;
-}
-
-.diagram {
-  text-align: center;
-}
-
-.diagram img {
-  max-width: 180px;
-  border: 1px solid #ccc;
-}
-
-.injury-extra {
-  margin-top: 1em;
-}
+/* Signature row */
+.button-row{display:flex;gap:1rem;margin-top:.5rem}
