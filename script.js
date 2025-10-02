@@ -1,4 +1,5 @@
 let currentEditId = null;
+let existingCreated = null;
 
 // IndexedDB setup
 let db;
@@ -16,46 +17,22 @@ request.onsuccess = (e) => {
   loadRecords();
 };
 
-function editReport(id) {
-  const tx = db.transaction("reports", "readonly");
-  const store = tx.objectStore("reports");
-  const req = store.get(id);
-
-  req.onsuccess = () => {
-    const report = req.result;
-    if (!report) return;
-
-    document.getElementById("patientName").value = report.patientName;
-    document.getElementById("dob").value = report.dob;
-    document.getElementById("heartRate").value = report.heartRate;
-    document.getElementById("bloodPressure").value = report.bloodPressure;
-    document.getElementById("treatment").value = report.treatment;
-
-    // Load signature back into canvas
-    const img = new Image();
-    img.onload = () => {
-      clearSignature();
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    img.src = report.signature;
-
-    currentEditId = report.id;
-    showForm();
-  };
-}
-
 request.onerror = (e) => {
   console.error("IndexedDB error:", e);
 };
 
+// -----------------------------
 // Form handling
+// -----------------------------
 const form = document.getElementById("casualty-form");
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   saveReport();
 });
 
-// Signature pad
+// -----------------------------
+// Signature pad setup
+// -----------------------------
 const canvas = document.getElementById("signature-pad");
 const ctx = canvas.getContext("2d");
 
@@ -83,8 +60,10 @@ let drawing = false;
 
 function getPos(e) {
   if (e.touches && e.touches[0]) {
-    return { x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
-             y: e.touches[0].clientY - canvas.getBoundingClientRect().top };
+    return { 
+      x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+      y: e.touches[0].clientY - canvas.getBoundingClientRect().top 
+    };
   } else {
     return { x: e.offsetX, y: e.offsetY };
   }
@@ -124,6 +103,9 @@ function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+// -----------------------------
+// Save report
+// -----------------------------
 function saveReport() {
   const signature = canvas.toDataURL();
 
@@ -134,8 +116,9 @@ function saveReport() {
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
     signature,
-    created: new Date().toISOString(),
-    id: currentEditId || undefined  // keep id if editing
+    created: currentEditId ? existingCreated : new Date().toISOString(),
+    updated: currentEditId ? new Date().toISOString() : null,
+    id: currentEditId || undefined
   };
 
   const tx = db.transaction("reports", "readwrite");
@@ -152,11 +135,14 @@ function saveReport() {
     form.reset();
     clearSignature();
     currentEditId = null;
+    existingCreated = null;
     loadRecords();
   };
 }
 
+// -----------------------------
 // Load saved records
+// -----------------------------
 function loadRecords() {
   const list = document.getElementById("records-list");
   list.innerHTML = "";
@@ -169,24 +155,60 @@ function loadRecords() {
     if (cursor) {
       const report = cursor.value;
       const li = document.createElement("li");
-      li.textContent = `${report.patientName} (${report.created})`;
-      
-      const btn = document.createElement("button");
-      btn.textContent = "Export PDF";
-      btn.onclick = () => exportPDF(report);
-      
+      li.textContent = `${report.patientName} (Created: ${report.created})`;
+
+      const exportBtn = document.createElement("button");
+      exportBtn.textContent = "Export PDF";
+      exportBtn.onclick = () => exportPDF(report);
+
       const editBtn = document.createElement("button");
       editBtn.textContent = "Edit";
       editBtn.onclick = () => editReport(report.id);
 
-      li.appendChild(btn);
+      li.appendChild(exportBtn);
+      li.appendChild(editBtn);
       list.appendChild(li);
+
       cursor.continue();
     }
   };
 }
 
+// -----------------------------
+// Edit report
+// -----------------------------
+function editReport(id) {
+  const tx = db.transaction("reports", "readonly");
+  const store = tx.objectStore("reports");
+  const req = store.get(id);
+
+  req.onsuccess = () => {
+    const report = req.result;
+    if (!report) return;
+
+    document.getElementById("patientName").value = report.patientName;
+    document.getElementById("dob").value = report.dob;
+    document.getElementById("heartRate").value = report.heartRate;
+    document.getElementById("bloodPressure").value = report.bloodPressure;
+    document.getElementById("treatment").value = report.treatment;
+
+    // Load signature back into canvas
+    const img = new Image();
+    img.onload = () => {
+      clearSignature();
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+    img.src = report.signature;
+
+    currentEditId = report.id;
+    existingCreated = report.created;
+    showForm(); // switch back to form view
+  };
+}
+
+// -----------------------------
 // Export PDF
+// -----------------------------
 function exportPDF(report) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -207,10 +229,16 @@ function exportPDF(report) {
     doc.addImage(report.signature, "PNG", 40, 120, 50, 25);
   }
 
+  if (report.updated) {
+    doc.text(`Last Updated: ${report.updated}`, 10, 160);
+  }
+
   doc.save(`casualty_report_${report.patientName}.pdf`);
 }
 
+// -----------------------------
 // Navigation
+// -----------------------------
 function showForm() {
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
