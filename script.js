@@ -1,10 +1,9 @@
 let currentEditId = null;
-let existingCreated = null;
 let isDirty = false;
 
 // IndexedDB setup
 let db;
-const request = indexedDB.open("casualtyDB", 2);
+const request = indexedDB.open("casualtyDB", 1);
 
 request.onupgradeneeded = (e) => {
   db = e.target.result;
@@ -18,46 +17,52 @@ request.onsuccess = (e) => {
   loadRecords();
 };
 
-request.onerror = (e) => {
-  console.error("IndexedDB error:", e);
-};
+request.onerror = (e) => console.error("DB error:", e);
 
-// -----------------------------
+// Track unsaved changes
+document.querySelectorAll("input, textarea").forEach(el => {
+  el.addEventListener("input", () => {
+    isDirty = true;
+    updateSaveStatus();
+  });
+});
+
+function updateSaveStatus() {
+  const status = document.getElementById("save-status");
+  if (document.getElementById("form-section").style.display === "block") {
+    status.textContent = isDirty ? "Not Saved" : "Saved";
+    status.style.color = isDirty ? "red" : "limegreen";
+  } else {
+    status.textContent = "";
+  }
+}
+
+function toggleRecurring(show) {
+  document.getElementById("recurringDateField").style.display = show ? "block" : "none";
+}
+
 // Form handling
-// -----------------------------
 const form = document.getElementById("casualty-form");
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   saveReport();
-  isDirty = false;
-  updateSaveStatus();
 });
 
-form.addEventListener("input", () => {
-  isDirty = true;
-  updateSaveStatus();
-});
-
-// -----------------------------
 // Signature pad
-// -----------------------------
 const canvas = document.getElementById("signature-pad");
 const ctx = canvas.getContext("2d");
 
-// Fixed size canvas, no scaling
-function resizeCanvas() {
-  canvas.width = 300;
-  canvas.height = 120;
-}
-resizeCanvas();
+// fixed size
+canvas.width = 300;
+canvas.height = 120;
 
 let drawing = false;
 
 function getPos(e) {
   if (e.touches && e.touches[0]) {
-    return { 
+    return {
       x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
-      y: e.touches[0].clientY - canvas.getBoundingClientRect().top 
+      y: e.touches[0].clientY - canvas.getBoundingClientRect().top
     };
   } else {
     return { x: e.offsetX, y: e.offsetY };
@@ -70,11 +75,7 @@ canvas.addEventListener("mousedown", (e) => {
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
 });
-canvas.addEventListener("mouseup", () => {
-  drawing = false;
-  isDirty = true;
-  updateSaveStatus();
-});
+canvas.addEventListener("mouseup", () => (drawing = false));
 canvas.addEventListener("mousemove", (e) => {
   if (!drawing) return;
   const pos = getPos(e);
@@ -82,18 +83,14 @@ canvas.addEventListener("mousemove", (e) => {
   ctx.stroke();
 });
 
-// Touch support
+// Touch
 canvas.addEventListener("touchstart", (e) => {
   drawing = true;
   const pos = getPos(e);
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
 });
-canvas.addEventListener("touchend", () => {
-  drawing = false;
-  isDirty = true;
-  updateSaveStatus();
-});
+canvas.addEventListener("touchend", () => (drawing = false));
 canvas.addEventListener("touchmove", (e) => {
   if (!drawing) return;
   const pos = getPos(e);
@@ -104,41 +101,41 @@ canvas.addEventListener("touchmove", (e) => {
 
 function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  isDirty = true;
-  updateSaveStatus();
 }
 
-// Clear Signature button
-document.getElementById("clear-signature").addEventListener("click", () => {
-  clearSignature();
-});
-
-// -----------------------------
 // Save report
-// -----------------------------
 function saveReport() {
   const signature = canvas.toDataURL();
-
   const report = {
+    id: currentEditId || undefined,
     patientName: document.getElementById("patientName").value,
     dob: document.getElementById("dob").value,
+    gender: document.getElementById("gender").value,
+    injuryDate: document.getElementById("injuryDate").value,
+    injuryTime: document.getElementById("injuryTime").value,
+    homeAddress: document.getElementById("homeAddress").value,
+    town: document.getElementById("town").value,
+    state: document.getElementById("state").value,
+    postcode: document.getElementById("postcode").value,
+    employeeNo: document.getElementById("employeeNo").value,
+    contractor: document.getElementById("contractor").value,
+    occupation: document.getElementById("occupation").value,
+    shiftStart: document.getElementById("shiftStart").value,
+    injuryLocation: document.getElementById("injuryLocation").value,
+    history: document.getElementById("history").value,
+    recurring: document.querySelector("input[name='recurring']:checked")?.value || "No",
+    recurringDate: document.getElementById("recurringDate").value,
     heartRate: document.getElementById("heartRate").value,
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
     signature,
-    signatureName: document.getElementById("signature-name").value, // NEW
-    created: currentEditId ? existingCreated : new Date().toISOString(),
-    updated: currentEditId ? new Date().toISOString() : null,
+    signerName: document.getElementById("signerName").value,
+    created: new Date().toISOString(),
     archived: false
   };
 
-  if (currentEditId) {
-    report.id = currentEditId;
-  }
-
   const tx = db.transaction("reports", "readwrite");
   const store = tx.objectStore("reports");
-
   if (currentEditId) {
     store.put(report);
   } else {
@@ -146,20 +143,17 @@ function saveReport() {
   }
 
   tx.oncomplete = () => {
-    alert(currentEditId ? "Report updated!" : "Report saved!");
+    alert("Report saved!");
     form.reset();
     clearSignature();
     currentEditId = null;
-    existingCreated = null;
-    loadRecords();
     isDirty = false;
     updateSaveStatus();
+    loadRecords();
   };
 }
 
-// -----------------------------
-// Load saved & archived records
-// -----------------------------
+// Load records
 function loadRecords() {
   const list = document.getElementById("records-list");
   const archivedList = document.getElementById("archived-list");
@@ -176,237 +170,40 @@ function loadRecords() {
       const li = document.createElement("li");
       li.textContent = `${report.patientName} (Created: ${report.created})`;
 
-      const buttonGroup = document.createElement("div");
-      buttonGroup.className = "button-group";
+      const pdfBtn = document.createElement("button");
+      pdfBtn.textContent = "Export PDF";
+      pdfBtn.className = "btn-pdf";
+      // hook PDF later
+      li.appendChild(pdfBtn);
 
-      const exportBtn = document.createElement("button");
-      exportBtn.textContent = "Export PDF";
-      exportBtn.className = "btn-pdf";
-      exportBtn.onclick = () => exportPDF(report);
-
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "Edit";
-      editBtn.className = "btn-edit";
-      editBtn.onclick = () => editReport(report.id);
-
-      const archiveBtn = document.createElement("button");
-      archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
-      archiveBtn.className = "btn-archive";
-      archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.className = "btn-delete";
-      deleteBtn.onclick = () => deleteReport(report.id);
-
-      buttonGroup.appendChild(exportBtn);
-      buttonGroup.appendChild(editBtn);
-      buttonGroup.appendChild(archiveBtn);
-      buttonGroup.appendChild(deleteBtn);
-
-      li.appendChild(buttonGroup);
-
-      if (report.archived) {
-        archivedList.appendChild(li);
-      } else {
-        list.appendChild(li);
-      }
-
+      (report.archived ? archivedList : list).appendChild(li);
       cursor.continue();
     }
   };
 }
 
-// -----------------------------
-// Edit report
-// -----------------------------
-function editReport(id) {
-  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
-
-  const tx = db.transaction("reports", "readonly");
-  const store = tx.objectStore("reports");
-  const req = store.get(id);
-
-  req.onsuccess = () => {
-    const report = req.result;
-    if (!report) return;
-
-    document.getElementById("patientName").value = report.patientName;
-    document.getElementById("dob").value = report.dob;
-    document.getElementById("heartRate").value = report.heartRate;
-    document.getElementById("bloodPressure").value = report.bloodPressure;
-    document.getElementById("treatment").value = report.treatment;
-    document.getElementById("signature-name").value = report.signatureName || "";
-
-    const img = new Image();
-    img.onload = () => {
-      clearSignature();
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    img.src = report.signature;
-
-    currentEditId = report.id;
-    existingCreated = report.created;
-    showForm();
-
-    isDirty = false;
-    updateSaveStatus();
-  };
-}
-
-// -----------------------------
-// Delete report
-// -----------------------------
-function deleteReport(id) {
-  if (confirm("Are you sure you want to delete this report? This action cannot be undone.")) {
-    const tx = db.transaction("reports", "readwrite");
-    const store = tx.objectStore("reports");
-    store.delete(id);
-
-    tx.oncomplete = () => {
-      alert("Report deleted.");
-      loadRecords();
-    };
-  }
-}
-
-// -----------------------------
-// Archive/Unarchive
-// -----------------------------
-function toggleArchive(id, newStatus) {
-  const tx = db.transaction("reports", "readwrite");
-  const store = tx.objectStore("reports");
-  const req = store.get(id);
-
-  req.onsuccess = () => {
-    const report = req.result;
-    if (!report) return;
-    report.archived = newStatus;
-    store.put(report);
-
-    tx.oncomplete = () => {
-      loadRecords();
-    };
-  };
-}
-
-// -----------------------------
-// Export PDF
-// -----------------------------
-function exportPDF(report) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFontSize(16);
-  doc.text("Casualty Assessment Report", 10, 20);
-
-  doc.setFontSize(12);
-  doc.text(`Patient: ${report.patientName}`, 10, 40);
-  doc.text(`DOB: ${report.dob}`, 10, 50);
-  doc.text(`Heart Rate: ${report.heartRate}`, 10, 60);
-  doc.text(`Blood Pressure: ${report.bloodPressure}`, 10, 70);
-  doc.text(`Treatment Notes:`, 10, 80);
-  doc.text(report.treatment, 10, 90, { maxWidth: 180 });
-
-  if (report.signature) {
-    doc.text("Signature:", 10, 130);
-    doc.addImage(report.signature, "PNG", 40, 120, 50, 25);
-    if (report.signatureName) {
-      doc.text(`Name: ${report.signatureName}`, 10, 155);
-    }
-  }
-
-  if (report.updated) {
-    doc.text(`Last Updated: ${report.updated}`, 10, 170);
-  }
-
-  doc.save(`casualty_report_${report.patientName}.pdf`);
-}
-
-// -----------------------------
 // Navigation
-// -----------------------------
-function handleUnsavedLeave() {
-  if (isDirty) {
-    if (confirm("You have unsaved changes on this report. Do you want to leave without saving?")) {
-      form.reset();
-      clearSignature();
-      currentEditId = null;
-      existingCreated = null;
-      isDirty = false;
-      updateSaveStatus();
-      return true;
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-
-function setActiveTab(tabName) {
-  const buttons = document.querySelectorAll("nav button");
-  buttons.forEach(btn => btn.classList.remove("active-tab"));
-
-  const map = {
-    "form": "New Report",
-    "records": "Saved Reports",
-    "archived": "Archived Reports"
-  };
-
-  buttons.forEach(btn => {
-    if (btn.textContent === map[tabName]) {
-      btn.classList.add("active-tab");
-    }
-  });
-}
-
 function showForm() {
-  if (!handleUnsavedLeave()) return;
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "none";
-  setActiveTab("form");
+  isDirty = false;
   updateSaveStatus();
 }
 
 function showRecords() {
-  if (!handleUnsavedLeave()) return;
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
   document.getElementById("archived-section").style.display = "none";
-  setActiveTab("records");
   updateSaveStatus();
 }
 
 function showArchived() {
-  if (!handleUnsavedLeave()) return;
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "none";
   document.getElementById("archived-section").style.display = "block";
-  setActiveTab("archived");
   updateSaveStatus();
 }
-
-function updateSaveStatus() {
-  const statusEl = document.getElementById("save-status");
-  const saveBtn = document.querySelector("#casualty-form button[type='submit']");
-
-  if (document.getElementById("form-section").style.display === "block") {
-    statusEl.textContent = isDirty ? "Not Saved" : "Saved";
-    statusEl.style.color = isDirty ? "red" : "lime";
-    statusEl.style.display = "inline";
-    saveBtn.disabled = !isDirty;
-  } else {
-    statusEl.style.display = "none";
-  }
-}
-
-// -----------------------------
-// Warn on full page unload
-// -----------------------------
-window.addEventListener("beforeunload", (e) => {
-  if (isDirty) {
-    e.preventDefault();
-    e.returnValue = "";
-  }
-});
