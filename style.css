@@ -98,6 +98,7 @@ button:disabled {
 .btn-delete {
   background-color: #b33;
   color: white;
+  margin-left: 1.5em;   /* extra spacing from the previous button */
 }
 
 nav button.active-tab {
