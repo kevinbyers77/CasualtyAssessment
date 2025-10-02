@@ -109,21 +109,31 @@ function initDiagram(canvasId, wrapperId, imgSrc){
 
   const img = new Image();
   img.onload = ()=> redraw();
-  img.src = "docs/" + imgSrc;         // ✅ points to /docs/front.png, /docs/back.png
+  img.src = "docs/" + imgSrc;
 
   // Dropdown (created once, positioned per click)
   const picker = document.createElement("select");
   picker.className = "btn-outline";
   picker.style.position = "absolute";
   picker.style.display = "none";
+
+  // ✅ Add placeholder
+  const placeholder = document.createElement("option");
+  placeholder.textContent = "Select an injury...";
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  picker.appendChild(placeholder);
+
   INJURY_CODES.forEach(code => {
     const opt = document.createElement("option");
-    opt.value = code; opt.textContent = code; picker.appendChild(opt);
+    opt.value = code;
+    opt.textContent = code;
+    picker.appendChild(opt);
   });
   wrap.appendChild(picker);
 
   picker.addEventListener("change", ()=>{
-    if(picker.style.display === "none") return;
+    if(picker.style.display === "none" || picker.value === "Select an injury...") return;
     const x = parseFloat(picker.dataset.x), y = parseFloat(picker.dataset.y);
     const code = picker.value;
     markers.push({x,y,code});
@@ -136,13 +146,11 @@ function initDiagram(canvasId, wrapperId, imgSrc){
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left;
     const y = e.clientY - r.top;
-
-    // Position dropdown at click (inside wrapper)
     picker.style.left = `${x - 16}px`;
     picker.style.top  = `${y - 10}px`;
     picker.dataset.x = x.toString();
     picker.dataset.y = y.toString();
-    picker.value = INJURY_CODES[0];
+    picker.value = "Select an injury...";
     picker.style.display = "block";
     picker.focus();
   }
@@ -150,9 +158,7 @@ function initDiagram(canvasId, wrapperId, imgSrc){
 
   function redraw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    // draw background image scaled to canvas
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    // draw markers
     ctx.fillStyle="black";
     ctx.font="14px Arial";
     markers.forEach(m => ctx.fillText(m.code, m.x, m.y));
@@ -168,6 +174,7 @@ function initDiagram(canvasId, wrapperId, imgSrc){
 
 const frontDiagram = initDiagram("diagram-front", "front-wrap", "front.png");
 const backDiagram  = initDiagram("diagram-back",  "back-wrap",  "back.png");
+
 
 /***********************
  * SAVE / LOAD REPORT
