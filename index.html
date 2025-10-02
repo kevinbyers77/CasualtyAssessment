@@ -5,14 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Casualty Assessment Report</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>
-      Casualty Assessment Report 
-      <span id="save-status" style="font-size: 0.6em; margin-left: 1em;"></span>
-    </h1>
+    <h1>Casualty Assessment Report <span id="save-status"></span></h1>
     <nav>
       <button onclick="showForm()">New Report</button>
       <button onclick="showRecords()">Saved Reports</button>
@@ -23,52 +19,86 @@
   <!-- Report Form -->
   <section id="form-section" style="display: none;">
     <form id="casualty-form">
-      <label>
-        Patient Name:
-        <input type="text" id="patientName" required>
-      </label>
-
-      <label>
-        Date of Birth:
-        <input type="date" id="dob">
-      </label>
-
+      <!-- Patient Info -->
       <fieldset>
-        <legend>Vitals</legend>
-        <label>
-          Heart Rate:
-          <input type="text" id="heartRate">
-        </label>
-        <label>
-          Blood Pressure:
-          <input type="text" id="bloodPressure">
+        <legend>Patient Info</legend>
+        <label>Patient Name: <input type="text" id="patientName" required></label>
+        <label>Date of Birth: <input type="date" id="dob"></label>
+        <label>Gender:
+          <select id="gender">
+            <option value="">-- Select --</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
         </label>
       </fieldset>
 
-      <label>
-        Treatment Notes:
+      <!-- Injury Info -->
+      <fieldset>
+        <legend>Injury Info</legend>
+        <div class="row">
+          <label>Date of Injury: <input type="date" id="injuryDate"></label>
+          <label>Time of Injury: <input type="time" id="injuryTime"></label>
+        </div>
+        <div class="row">
+          <label>Home Address: <input type="text" id="homeAddress" placeholder="Street"></label>
+          <label>Town: <input type="text" id="town"></label>
+        </div>
+        <div class="row">
+          <label>State: <input type="text" id="state"></label>
+          <label>Postcode: <input type="text" id="postcode"></label>
+        </div>
+        <div class="row">
+          <label>Employee No: <input type="text" id="employeeNo"></label>
+          <label>Contractor Company: <input type="text" id="contractor"></label>
+          <label>Occupation: <input type="text" id="occupation"></label>
+        </div>
+        <div class="row">
+          <label>Shift Start: <input type="time" id="shiftStart"></label>
+          <label>Injury Location: <input type="text" id="injuryLocation"></label>
+        </div>
+      </fieldset>
+
+      <!-- History -->
+      <fieldset>
+        <legend>History of Injury/Illness</legend>
+        <textarea id="history" placeholder="What job was being done? Environmental conditions? Who witnessed? How did the injury occur?"></textarea>
+        <label>Recurring Injury?
+          <input type="radio" name="recurring" value="Yes" onclick="toggleRecurring(true)"> Yes
+          <input type="radio" name="recurring" value="No" onclick="toggleRecurring(false)"> No
+        </label>
+        <div id="recurringDateField" style="display:none;">
+          <label>Date of Original Injury: <input type="date" id="recurringDate"></label>
+        </div>
+      </fieldset>
+
+      <!-- Vitals -->
+      <fieldset>
+        <legend>Vitals</legend>
+        <label>Heart Rate: <input type="text" id="heartRate"></label>
+        <label>Blood Pressure: <input type="text" id="bloodPressure"></label>
+      </fieldset>
+
+      <!-- Treatment Notes -->
+      <fieldset>
+        <legend>Treatment Notes</legend>
         <textarea id="treatment"></textarea>
-      </label>
+      </fieldset>
 
-      <!-- Signature area -->
-      <label for="signature-pad">Signature:</label>
-      <canvas id="signature-pad"></canvas>
-
-      <!-- Printed Name for signer -->
-      <label>
-        Printed Name (Signer):
-        <input type="text" id="signature-name">
-      </label>
-
-      <!-- Buttons row -->
-      <div class="form-actions">
-        <button type="button" id="clear-signature" class="btn-clear">Clear Signature</button>
-        <button type="submit" class="btn-save">Save Report</button>
-      </div>
+      <!-- Signature -->
+      <fieldset>
+        <legend>Signature</legend>
+        <canvas id="signature-pad"></canvas>
+        <label>Signer Name: <input type="text" id="signerName"></label>
+        <div class="button-row">
+          <button type="button" onclick="clearSignature()">Clear Signature</button>
+          <button type="submit">Save Report</button>
+        </div>
+      </fieldset>
     </form>
   </section>
 
-  <!-- Active Reports -->
+  <!-- Saved Reports -->
   <section id="records-section" style="display: none;">
     <h2>Active Reports</h2>
     <ul id="records-list"></ul>
@@ -80,6 +110,7 @@
     <ul id="archived-list"></ul>
   </section>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
