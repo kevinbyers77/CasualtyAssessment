@@ -50,11 +50,21 @@
         <textarea id="treatment"></textarea>
       </label>
 
+      <!-- Signature area -->
       <label for="signature-pad">Signature:</label>
       <canvas id="signature-pad"></canvas>
-      <button type="button" id="clear-signature" class="btn-clear">Clear Signature</button>
 
-      <button type="submit">Save Report</button>
+      <!-- Printed Name for signer -->
+      <label>
+        Printed Name (Signer):
+        <input type="text" id="signature-name">
+      </label>
+
+      <!-- Buttons row -->
+      <div class="form-actions">
+        <button type="button" id="clear-signature" class="btn-clear">Clear Signature</button>
+        <button type="submit" class="btn-save">Save Report</button>
+      </div>
     </form>
   </section>
 
