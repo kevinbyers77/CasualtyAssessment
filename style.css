@@ -199,3 +199,33 @@ button:disabled {
 .injury-extra{
   margin-top:1rem;
 }
+
+
+/* General section layout */
+fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1em;
+  align-items: center;
+}
+
+/* For questions with yes/no radios */
+.radio-group {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+/* For "Key Questions" tighter layout */
+.key-questions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1em;
+  align-items: center;
+}
+
+.key-questions label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
