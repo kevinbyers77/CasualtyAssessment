@@ -47,6 +47,15 @@ textarea {
   background: #fff;
 }
 
+#signature-pad {
+  border: 1px solid #000;
+  margin: 0.5em 0;
+  background: #fff;
+  width: 300px;     /* fixed width */
+  height: 100px;    /* fixed height */
+  display: block;
+}
+
 #records-list {
   list-style: none;
   padding: 0;
