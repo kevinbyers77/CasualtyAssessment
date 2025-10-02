@@ -162,3 +162,33 @@ button:disabled {
   color: #555;
   margin-bottom: 0.3em;
 }
+
+.injury-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 2em;
+}
+
+.injury-key {
+  flex: 1;
+}
+
+.injury-diagrams {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+}
+
+.diagram {
+  text-align: center;
+}
+
+.diagram img {
+  max-width: 180px;
+  border: 1px solid #ccc;
+}
+
+.injury-extra {
+  margin-top: 1em;
+}
