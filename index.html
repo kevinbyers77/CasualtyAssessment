@@ -9,10 +9,11 @@
 <body>
   <header>
     <h1>Casualty Assessment Report <span id="save-status">Saved</span></h1>
-    <nav>
-      <button onclick="showForm()">New Report</button>
-      <button onclick="showRecords()">Saved Reports</button>
-    </nav>
+   <nav>
+  <button onclick="showForm()">New Report</button>
+  <button onclick="showRecords()">Saved Reports</button>
+  <button onclick="showArchived()">Archived Reports</button>
+</nav>
   </header>
 
   <section id="form-section">
@@ -42,6 +43,11 @@
     <ul id="archived-list"></ul>
   </section>
 
+<div id="archived-section" style="display:none; padding:1em;">
+  <h2>Archived Reports</h2>
+  <ul id="archived-list"></ul>
+</div>
+  
   <script src="script.js"></script>
 </body>
 </html>
