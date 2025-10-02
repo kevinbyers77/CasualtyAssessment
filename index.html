@@ -141,22 +141,56 @@
       </fieldset>
 
       <!-- Secondary Assessment -->
-     <fieldset>
-  <legend>Secondary Assessment</legend>
-  <h4>Body Diagrams</h4>
-  <div class="row">
-    <div>
-      <canvas id="diagram-front" width="200" height="400"></canvas>
-      <button type="button" id="undo-front">Undo Last</button>
+  <fieldset>
+  <legend>Secondary Assessment of Injuries</legend>
+  <div style="display: flex; gap: 2em;">
+    <!-- Left column: Key -->
+    <div style="flex: 1;">
+      <h4>Injury Key</h4>
+      <ul style="list-style: none; padding-left: 0;">
+        <li><strong>A</strong> – Abrasions</li>
+        <li><strong>L</strong> – Laceration</li>
+        <li><strong>B</strong> – Burn (Full / Partial / Superficial)</li>
+        <li><strong>P</strong> – Pain</li>
+        <li><strong>S</strong> – Swelling</li>
+        <li><strong>O</strong> – Open Fracture</li>
+        <li><strong>Am</strong> – Amputation</li>
+        <li><strong>C</strong> – Contusion</li>
+        <li><strong>T</strong> – Tenderness</li>
+        <li><strong>D</strong> – Deformity</li>
+        <li><strong>E</strong> – Embedded Object</li>
+      </ul>
     </div>
-    <div>
-      <canvas id="diagram-back" width="200" height="400"></canvas>
-      <button type="button" id="undo-back">Undo Last</button>
+
+    <!-- Right column: Diagrams -->
+    <div style="flex: 2; text-align: center;">
+      <div style="display: flex; gap: 2em; justify-content: center;">
+        <div>
+          <canvas id="diagram-front" width="200" height="400"></canvas>
+          <button type="button" id="undo-front">Undo Last</button>
+          <p>Front</p>
+        </div>
+        <div>
+          <canvas id="diagram-back" width="200" height="400"></canvas>
+          <button type="button" id="undo-back">Undo Last</button>
+          <p>Back</p>
+        </div>
+      </div>
+
+      <!-- Questions under diagrams -->
+      <div style="margin-top: 1em; text-align: left;">
+        <p><strong>Fluid/Air Injection Injury:</strong>
+          <label><input type="radio" name="fluidInjury" value="Yes"> Yes</label>
+          <label><input type="radio" name="fluidInjury" value="No"> No</label>
+        </p>
+
+        <p><strong>Breath Sounds:</strong></p>
+        <label><input type="checkbox" name="breathSounds" value="Clear"> Clear</label>
+        <label><input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy</label>
+        <label><input type="checkbox" name="breathSounds" value="Decreased"> Decreased</label>
+        <label><input type="checkbox" name="breathSounds" value="Noisy"> Noisy</label>
+      </div>
     </div>
-  </div>
-  <div class="help-text">
-    <strong>Key:</strong> A=Abrasion, L=Laceration, B=Bleeding, P=Pain, S=Swelling, 
-    O=Open Fracture, Am=Amputation, C=Contusion, T=Tenderness, D=Deformity, E=Embedded Object
   </div>
 </fieldset>
 
