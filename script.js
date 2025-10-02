@@ -46,18 +46,6 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// Expand signature pad when clicked/tapped
-canvas.addEventListener("click", () => {
-  canvas.classList.add("expanded");
-  resizeCanvas(); // re-scale coordinates after expand
-});
-
-// Collapse if double-clicked (or tapped twice quickly)
-canvas.addEventListener("dblclick", () => {
-  canvas.classList.remove("expanded");
-  resizeCanvas(); // re-scale coordinates after collapse
-});
-
 let drawing = false;
 
 function getPos(e) {
@@ -123,7 +111,7 @@ function saveReport() {
     updated: currentEditId ? new Date().toISOString() : null
   };
 
-  // If editing, keep the ID
+  // Only add ID if editing
   if (currentEditId) {
     report.id = currentEditId;
   }
@@ -146,6 +134,7 @@ function saveReport() {
     loadRecords();
   };
 }
+
 // -----------------------------
 // Load saved records
 // -----------------------------
