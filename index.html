@@ -1,152 +1,260 @@
-<!-- History -->
-<fieldset>
-  <legend>History of Injury/Illness</legend>
-  <div class="help-text">
-    What job was being done? Environmental conditions? Who witnessed? How did the injury occur?
-  </div>
-  <textarea id="history"></textarea>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Casualty Assessment</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>Casualty Assessment Report</h1>
+  <nav>
+    <button id="btn-new" onclick="showForm()">New Report</button>
+    <button id="btn-saved" onclick="showRecords()">Saved Reports</button>
+    <button id="btn-archived" onclick="showArchived()">Archived Reports</button>
+  </nav>
+  <div id="save-status"></div>
+</header>
 
-  <div class="radio-group">
-    <label>Recurring Injury?</label>
-    <label><input type="radio" name="recurring" value="Yes" onclick="toggleRecurring(true)"> Yes</label>
-    <label><input type="radio" name="recurring" value="No" onclick="toggleRecurring(false)"> No</label>
-    <div id="recurringDateField" style="display:none;">
-      <label>Date of original injury <input id="recurringDate" type="date" /></label>
-    </div>
-  </div>
-</fieldset>
+<main>
+  <!-- Form -->
+  <section id="form-section" style="display:none;">
+    <form id="casualty-form">
 
-<!-- Primary Assessment -->
-<fieldset>
-  <legend>Primary Assessment</legend>
-  <div class="row">
-    <label><input id="danger" type="checkbox" /> Danger present</label>
-    <label>Response
-      <select id="response">
-        <option value="">—</option>
-        <option>Conscious</option>
-        <option>Semi-conscious</option>
-        <option>Unconscious</option>
-      </select>
-    </label>
-    <label>Airway
-      <select id="airway">
-        <option value="">—</option>
-        <option>Clear</option>
-        <option>Obstructed</option>
-        <option>Guedel</option>
-      </select>
-    </label>
-    <label>Breathing
-      <select id="breathing">
-        <option value="">—</option>
-        <option>Normal</option>
-        <option>Abnormal</option>
-        <option>Absent</option>
-      </select>
-    </label>
-    <label>Signs of Life
-      <select id="signsOfLife">
-        <option value="">—</option>
-        <option>Pink</option>
-        <option>Pale</option>
-        <option>Cyanosed</option>
-      </select>
-    </label>
-  </div>
-</fieldset>
+      <!-- Patient Info -->
+      <fieldset>
+        <legend>Patient Information</legend>
+        <div class="row">
+          <label>Name <input id="patientName" type="text"></label>
+          <label>DOB <input id="dob" type="date"></label>
+          <label>Gender 
+            <select id="gender">
+              <option></option><option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>Home Address <input id="homeAddress" type="text"></label>
+          <label>Town <input id="town" type="text"></label>
+          <label>State <input id="state" type="text"></label>
+          <label>Postcode <input id="postcode" type="text"></label>
+        </div>
+        <div class="row">
+          <label>Employee No <input id="employeeNo" type="text"></label>
+          <label>Contractor <input id="contractor" type="text"></label>
+          <label>Occupation <input id="occupation" type="text"></label>
+          <label>Shift Start <input id="shiftStart" type="time"></label>
+        </div>
+      </fieldset>
 
-<!-- Secondary Assessment extras -->
-<div class="injury-extra">
-  <div class="radio-group">
-    <label>Fluid/Air Injection Injury:</label>
-    <label><input type="radio" name="fluidInjury" value="Yes"> Yes</label>
-    <label><input type="radio" name="fluidInjury" value="No"> No</label>
-  </div>
-  <div class="radio-group">
-    <span>Breath Sounds:</span>
-    <label><input type="checkbox" name="breathSounds" value="Clear"> Clear</label>
-    <label><input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy</label>
-    <label><input type="checkbox" name="breathSounds" value="Decreased"> Decreased</label>
-    <label><input type="checkbox" name="breathSounds" value="Noisy"> Noisy</label>
-  </div>
-</div>
+      <!-- Injury Info -->
+      <fieldset>
+        <legend>Injury Details</legend>
+        <div class="row">
+          <label>Date <input id="injuryDate" type="date"></label>
+          <label>Time <input id="injuryTime" type="time"></label>
+          <label>Location <input id="injuryLocation" type="text"></label>
+        </div>
+      </fieldset>
 
-<!-- Key Questions -->
-<fieldset>
-  <legend>Key Questions</legend>
-  <div class="key-questions">
-    <label>Remember what happened?
-      <input type="radio" name="remember" value="Yes"> Yes
-      <input type="radio" name="remember" value="No"> No
-    </label>
-    <label>Where does it hurt most? <input id="hurtMost" type="text"></label>
-    <label>Pain rating (1–10) <input id="painRating" type="number" min="1" max="10" /></label>
-    <label>Deep breath?
-      <input type="radio" name="deepBreath" value="Yes"> Yes
-      <input type="radio" name="deepBreath" value="No"> No
-    </label>
-  </div>
-</fieldset>
+      <!-- History -->
+      <fieldset>
+        <legend>History of Injury/Illness</legend>
+        <div class="help-text">
+          What job was being done? Environmental conditions? Who witnessed? How did the injury occur?
+        </div>
+        <textarea id="history"></textarea>
 
-<!-- Allergies -->
-<fieldset>
-  <legend>Allergies</legend>
-  <div class="row">
-    <label><input type="radio" name="allergies" value="No"> No</label>
-    <label><input type="radio" name="allergies" value="Yes"> Yes</label>
-    <label class="grow">Details <input id="allergyDetails" type="text" /></label>
-  </div>
-</fieldset>
+        <div class="radio-group">
+          <label>Recurring Injury?</label>
+          <label><input type="radio" name="recurring" value="Yes" onclick="toggleRecurring(true)"> Yes</label>
+          <label><input type="radio" name="recurring" value="No" onclick="toggleRecurring(false)"> No</label>
+          <div id="recurringDateField" style="display:none;">
+            <label>Date of original injury <input id="recurringDate" type="date" /></label>
+          </div>
+        </div>
+      </fieldset>
 
-<!-- Previous Illness -->
-<fieldset>
-  <legend>Previous Illness</legend>
-  <div class="pill-grid">
-    <label><input class="illness" type="checkbox" value="Cardiac"> Cardiac</label>
-    <label><input class="illness" type="checkbox" value="Diabetes"> Diabetes</label>
-    <label><input class="illness" type="checkbox" value="Epilepsy"> Epilepsy</label>
-    <label><input class="illness" type="checkbox" value="Respiratory"> Respiratory</label>
-    <label><input class="illness" type="checkbox" value="Hypertension"> Hypertension</label>
-    <label><input class="illness" type="checkbox" value="Renal"> Renal</label>
-    <label><input class="illness" type="checkbox" value="Stroke"> Stroke</label>
-    <label><input class="illness" type="checkbox" value="Psychological"> Psychological</label>
-  </div>
-</fieldset>
+      <!-- Primary Assessment -->
+      <fieldset>
+        <legend>Primary Assessment</legend>
+        <div class="row">
+          <label><input id="danger" type="checkbox"> Danger present</label>
+          <label>Response
+            <select id="response">
+              <option></option><option>Conscious</option><option>Semi-conscious</option><option>Unconscious</option>
+            </select>
+          </label>
+          <label>Airway
+            <select id="airway">
+              <option></option><option>Clear</option><option>Obstructed</option><option>Guedel</option>
+            </select>
+          </label>
+          <label>Breathing
+            <select id="breathing">
+              <option></option><option>Normal</option><option>Abnormal</option><option>Absent</option>
+            </select>
+          </label>
+          <label>Signs of Life
+            <select id="signsOfLife">
+              <option></option><option>Pink</option><option>Pale</option><option>Cyanosed</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
 
-<!-- Medications -->
-<fieldset>
-  <legend>Medications</legend>
-  <div class="row">
-    <label>Regular medications <textarea id="regularMeds"></textarea></label>
-    <label>Medications taken today <textarea id="todayMeds"></textarea></label>
-  </div>
-</fieldset>
+      <!-- Observations -->
+      <fieldset>
+        <legend>Observations</legend>
+        <table id="observations-table">
+          <thead>
+            <tr>
+              <th>Time</th><th>Pulse</th><th>BP</th><th>Breaths</th>
+              <th>GCS</th><th>Pupil L</th><th>Pupil R</th>
+              <th>React L</th><th>React R</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" onclick="addObservationRow()">Add Observation</button>
+      </fieldset>
 
-<!-- Vitals -->
-<fieldset>
-  <legend>Vitals</legend>
-  <div class="row">
-    <label>Heart Rate <input id="heartRate" type="text" /></label>
-    <label>Blood Pressure <input id="bloodPressure" type="text" /></label>
-  </div>
-</fieldset>
+      <!-- Body Diagrams -->
+      <fieldset>
+        <legend>Secondary Assessment</legend>
+        <div class="diagram-section">
+          <div id="injury-key">
+            <h4>Injury Codes</h4>
+            <ul>
+              <li>A – Abrasion</li>
+              <li>L – Laceration</li>
+              <li>B – Bruise</li>
+              <li>P – Puncture</li>
+              <li>S – Swelling</li>
+              <li>O – Other</li>
+              <li>Am – Amputation</li>
+              <li>C – Crush</li>
+              <li>T – Tenderness</li>
+              <li>D – Deformity</li>
+              <li>E – Embedded</li>
+            </ul>
+          </div>
+          <div id="front-wrap">
+            <canvas id="diagram-front" width="300" height="500"></canvas>
+          </div>
+          <div id="back-wrap">
+            <canvas id="diagram-back" width="300" height="500"></canvas>
+          </div>
+        </div>
+        <div class="injury-extra">
+          <div class="radio-group">
+            <label>Fluid/Air Injection Injury:</label>
+            <label><input type="radio" name="fluidInjury" value="Yes"> Yes</label>
+            <label><input type="radio" name="fluidInjury" value="No"> No</label>
+          </div>
+          <div class="radio-group">
+            <span>Breath Sounds:</span>
+            <label><input type="checkbox" name="breathSounds" value="Clear"> Clear</label>
+            <label><input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy</label>
+            <label><input type="checkbox" name="breathSounds" value="Decreased"> Decreased</label>
+            <label><input type="checkbox" name="breathSounds" value="Noisy"> Noisy</label>
+          </div>
+        </div>
+      </fieldset>
 
-<!-- Treatment -->
-<fieldset>
-  <legend>Treatment Notes</legend>
-  <textarea id="treatment"></textarea>
-</fieldset>
+      <!-- Key Questions -->
+      <fieldset>
+        <legend>Key Questions</legend>
+        <div class="key-questions">
+          <label>Remember what happened?
+            <input type="radio" name="remember" value="Yes"> Yes
+            <input type="radio" name="remember" value="No"> No
+          </label>
+          <label>Where does it hurt most? <input id="hurtMost" type="text"></label>
+          <label>Pain rating (1–10) <input id="painRating" type="number" min="1" max="10"></label>
+          <label>Deep breath?
+            <input type="radio" name="deepBreath" value="Yes"> Yes
+            <input type="radio" name="deepBreath" value="No"> No
+          </label>
+        </div>
+      </fieldset>
 
-<!-- Signature -->
-<fieldset>
-  <legend>Signature</legend>
-  <canvas id="signature-pad" width="300" height="120"></canvas>
-  <div class="row">
-    <label class="grow">Signer Name <input id="signerName" type="text" /></label>
-  </div>
-  <div class="button-row">
-    <button type="button" id="clear-signature" class="btn-outline">Clear Signature</button>
-    <button type="submit" class="btn-primary">Save Report</button>
-  </div>
-</fieldset>
+      <!-- Allergies -->
+      <fieldset>
+        <legend>Allergies</legend>
+        <div class="row">
+          <label><input type="radio" name="allergies" value="No"> No</label>
+          <label><input type="radio" name="allergies" value="Yes"> Yes</label>
+          <label class="grow">Details <input id="allergyDetails" type="text"></label>
+        </div>
+      </fieldset>
+
+      <!-- Previous Illness -->
+      <fieldset>
+        <legend>Previous Illness</legend>
+        <div class="pill-grid">
+          <label><input class="illness" type="checkbox" value="Cardiac"> Cardiac</label>
+          <label><input class="illness" type="checkbox" value="Diabetes"> Diabetes</label>
+          <label><input class="illness" type="checkbox" value="Epilepsy"> Epilepsy</label>
+          <label><input class="illness" type="checkbox" value="Respiratory"> Respiratory</label>
+          <label><input class="illness" type="checkbox" value="Hypertension"> Hypertension</label>
+          <label><input class="illness" type="checkbox" value="Renal"> Renal</label>
+          <label><input class="illness" type="checkbox" value="Stroke"> Stroke</label>
+          <label><input class="illness" type="checkbox" value="Psychological"> Psychological</label>
+        </div>
+      </fieldset>
+
+      <!-- Medications -->
+      <fieldset>
+        <legend>Medications</legend>
+        <div class="row">
+          <label>Regular medications <textarea id="regularMeds"></textarea></label>
+          <label>Medications taken today <textarea id="todayMeds"></textarea></label>
+        </div>
+      </fieldset>
+
+      <!-- Vitals -->
+      <fieldset>
+        <legend>Vitals</legend>
+        <div class="row">
+          <label>Heart Rate <input id="heartRate" type="text"></label>
+          <label>Blood Pressure <input id="bloodPressure" type="text"></label>
+        </div>
+      </fieldset>
+
+      <!-- Treatment -->
+      <fieldset>
+        <legend>Treatment Notes</legend>
+        <textarea id="treatment"></textarea>
+      </fieldset>
+
+      <!-- Signature -->
+      <fieldset>
+        <legend>Signature</legend>
+        <canvas id="signature-pad" width="300" height="120"></canvas>
+        <div class="row">
+          <label class="grow">Signer Name <input id="signerName" type="text"></label>
+        </div>
+        <div class="button-row">
+          <button type="button" id="clear-signature" class="btn-outline">Clear Signature</button>
+          <button type="submit" class="btn-primary">Save Report</button>
+        </div>
+      </fieldset>
+    </form>
+  </section>
+
+  <!-- Records -->
+  <section id="records-section" style="display:block;">
+    <ul id="records-list"></ul>
+  </section>
+
+  <!-- Archived -->
+  <section id="archived-section" style="display:none;">
+    <ul id="archived-list"></ul>
+  </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
