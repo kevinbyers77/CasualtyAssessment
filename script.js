@@ -173,26 +173,31 @@ function loadRecords() {
       const li = document.createElement("li");
       li.textContent = `${report.patientName} (Created: ${report.created})`;
 
-      const exportBtn = document.createElement("button");
-      exportBtn.textContent = "Export PDF";
-      exportBtn.onclick = () => exportPDF(report);
+const exportBtn = document.createElement("button");
+exportBtn.textContent = "Export PDF";
+exportBtn.className = "btn-pdf";
+exportBtn.onclick = () => exportPDF(report);
 
-      const editBtn = document.createElement("button");
-      editBtn.textContent = "Edit";
-      editBtn.onclick = () => editReport(report.id);
+const editBtn = document.createElement("button");
+editBtn.textContent = "Edit";
+editBtn.className = "btn-edit";
+editBtn.onclick = () => editReport(report.id);
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete";
-      deleteBtn.onclick = () => deleteReport(report.id);
+const archiveBtn = document.createElement("button");
+archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
+archiveBtn.className = "btn-archive";
+archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
 
-      const archiveBtn = document.createElement("button");
-      archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
-      archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Delete";
+deleteBtn.className = "btn-delete";
+deleteBtn.onclick = () => deleteReport(report.id);
 
-      li.appendChild(exportBtn);
-      li.appendChild(editBtn);
-      li.appendChild(deleteBtn);
-      li.appendChild(archiveBtn);
+// Append in order
+li.appendChild(exportBtn);
+li.appendChild(editBtn);
+li.appendChild(archiveBtn);
+li.appendChild(deleteBtn);
 
       if (report.archived) {
         archivedList.appendChild(li);
@@ -326,12 +331,16 @@ function showRecords() {
 
 function updateSaveStatus() {
   const statusEl = document.getElementById("save-status");
+  const saveBtn = document.querySelector("#casualty-form button[type='submit']");
 
   // Only show on form screen
   if (document.getElementById("form-section").style.display === "block") {
     statusEl.textContent = isDirty ? "Not Saved" : "Saved";
     statusEl.style.color = isDirty ? "red" : "lime";
     statusEl.style.display = "inline";
+
+    // Toggle save button
+    saveBtn.disabled = !isDirty;
   } else {
     statusEl.style.display = "none";
   }
