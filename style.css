@@ -14,6 +14,12 @@ header h1 {
   margin: 0;
 }
 
+#save-status {
+  font-size: 0.8em;
+  margin-left: 1em;
+  color: green;
+}
+
 nav button {
   margin: 0.5em;
   padding: 0.5em 1em;
@@ -50,12 +56,12 @@ textarea {
   display: block;
 }
 
-#records-list {
+#records-list, #archived-list {
   list-style: none;
   padding: 0;
 }
 
-#records-list li {
+#records-list li, #archived-list li {
   border-bottom: 1px solid #ddd;
   padding: 0.5em;
   display: flex;
