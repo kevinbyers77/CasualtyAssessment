@@ -141,18 +141,24 @@
       </fieldset>
 
       <!-- Secondary Assessment -->
-      <fieldset>
-        <legend>Secondary Assessment</legend>
-        <h4>Body Diagrams</h4>
-        <div class="row">
-          <canvas id="diagram-front" width="200" height="400"></canvas>
-          <canvas id="diagram-back" width="200" height="400"></canvas>
-        </div>
-        <div class="help-text">
-          <strong>Key:</strong> A=Abrasion, L=Laceration, B=Bleeding, P=Pain, S=Swelling, O=Open Fracture,
-          Am=Amputation, C=Contusion, T=Tenderness, D=Deformity, E=Embedded Object
-        </div>
-      </fieldset>
+     <fieldset>
+  <legend>Secondary Assessment</legend>
+  <h4>Body Diagrams</h4>
+  <div class="row">
+    <div>
+      <canvas id="diagram-front" width="200" height="400"></canvas>
+      <button type="button" id="undo-front">Undo Last</button>
+    </div>
+    <div>
+      <canvas id="diagram-back" width="200" height="400"></canvas>
+      <button type="button" id="undo-back">Undo Last</button>
+    </div>
+  </div>
+  <div class="help-text">
+    <strong>Key:</strong> A=Abrasion, L=Laceration, B=Bleeding, P=Pain, S=Swelling, 
+    O=Open Fracture, Am=Amputation, C=Contusion, T=Tenderness, D=Deformity, E=Embedded Object
+  </div>
+</fieldset>
 
       <!-- Key Questions -->
       <fieldset>
