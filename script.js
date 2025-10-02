@@ -1,14 +1,20 @@
 let currentEditId = null;
 let existingCreated = null;
+let isDirty = false;
 
 // IndexedDB setup
 let db;
-const request = indexedDB.open("casualtyDB", 1);
+const request = indexedDB.open("casualtyDB", 2);
 
 request.onupgradeneeded = (e) => {
   db = e.target.result;
   if (!db.objectStoreNames.contains("reports")) {
     db.createObjectStore("reports", { keyPath: "id", autoIncrement: true });
+  } else {
+    const store = e.target.transaction.objectStore("reports");
+    if (!store.indexNames.contains("archived")) {
+      // we just add archived flag support
+    }
   }
 };
 
@@ -28,6 +34,14 @@ const form = document.getElementById("casualty-form");
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   saveReport();
+  isDirty = false;
+  updateSaveStatus();
+});
+
+// Mark form dirty on input
+form.addEventListener("input", () => {
+  isDirty = true;
+  updateSaveStatus();
 });
 
 // -----------------------------
@@ -36,7 +50,6 @@ form.addEventListener("submit", (e) => {
 const canvas = document.getElementById("signature-pad");
 const ctx = canvas.getContext("2d");
 
-// Scale properly for high-DPI screens (Retina, phones, etc.)
 function resizeCanvas() {
   const ratio = window.devicePixelRatio || 1;
   canvas.width = canvas.offsetWidth * ratio;
@@ -65,7 +78,11 @@ canvas.addEventListener("mousedown", (e) => {
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
 });
-canvas.addEventListener("mouseup", () => (drawing = false));
+canvas.addEventListener("mouseup", () => {
+  drawing = false;
+  isDirty = true;
+  updateSaveStatus();
+});
 canvas.addEventListener("mousemove", (e) => {
   if (!drawing) return;
   const pos = getPos(e);
@@ -73,14 +90,18 @@ canvas.addEventListener("mousemove", (e) => {
   ctx.stroke();
 });
 
-// Touch support (for phones)
+// Touch support
 canvas.addEventListener("touchstart", (e) => {
   drawing = true;
   const pos = getPos(e);
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
 });
-canvas.addEventListener("touchend", () => (drawing = false));
+canvas.addEventListener("touchend", () => {
+  drawing = false;
+  isDirty = true;
+  updateSaveStatus();
+});
 canvas.addEventListener("touchmove", (e) => {
   if (!drawing) return;
   const pos = getPos(e);
@@ -91,6 +112,8 @@ canvas.addEventListener("touchmove", (e) => {
 
 function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  isDirty = true;
+  updateSaveStatus();
 }
 
 // -----------------------------
@@ -99,7 +122,6 @@ function clearSignature() {
 function saveReport() {
   const signature = canvas.toDataURL();
 
-  // Build report object
   const report = {
     patientName: document.getElementById("patientName").value,
     dob: document.getElementById("dob").value,
@@ -108,10 +130,10 @@ function saveReport() {
     treatment: document.getElementById("treatment").value,
     signature,
     created: currentEditId ? existingCreated : new Date().toISOString(),
-    updated: currentEditId ? new Date().toISOString() : null
+    updated: currentEditId ? new Date().toISOString() : null,
+    archived: false
   };
 
-  // Only add ID if editing
   if (currentEditId) {
     report.id = currentEditId;
   }
@@ -120,9 +142,9 @@ function saveReport() {
   const store = tx.objectStore("reports");
 
   if (currentEditId) {
-    store.put(report); // update existing
+    store.put(report);
   } else {
-    store.add(report); // new record
+    store.add(report);
   }
 
   tx.oncomplete = () => {
@@ -132,15 +154,19 @@ function saveReport() {
     currentEditId = null;
     existingCreated = null;
     loadRecords();
+    isDirty = false;
+    updateSaveStatus();
   };
 }
 
 // -----------------------------
-// Load saved records
+// Load saved & archived records
 // -----------------------------
 function loadRecords() {
   const list = document.getElementById("records-list");
+  const archivedList = document.getElementById("archived-list");
   list.innerHTML = "";
+  archivedList.innerHTML = "";
 
   const tx = db.transaction("reports", "readonly");
   const store = tx.objectStore("reports");
@@ -164,10 +190,20 @@ function loadRecords() {
       deleteBtn.textContent = "Delete";
       deleteBtn.onclick = () => deleteReport(report.id);
 
+      const archiveBtn = document.createElement("button");
+      archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
+      archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
+
       li.appendChild(exportBtn);
       li.appendChild(editBtn);
       li.appendChild(deleteBtn);
-      list.appendChild(li);
+      li.appendChild(archiveBtn);
+
+      if (report.archived) {
+        archivedList.appendChild(li);
+      } else {
+        list.appendChild(li);
+      }
 
       cursor.continue();
     }
@@ -178,6 +214,8 @@ function loadRecords() {
 // Edit report
 // -----------------------------
 function editReport(id) {
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+
   const tx = db.transaction("reports", "readonly");
   const store = tx.objectStore("reports");
   const req = store.get(id);
@@ -192,7 +230,6 @@ function editReport(id) {
     document.getElementById("bloodPressure").value = report.bloodPressure;
     document.getElementById("treatment").value = report.treatment;
 
-    // Load signature back into canvas
     const img = new Image();
     img.onload = () => {
       clearSignature();
@@ -202,7 +239,9 @@ function editReport(id) {
 
     currentEditId = report.id;
     existingCreated = report.created;
-    showForm(); // switch back to form view
+    showForm();
+    isDirty = false;
+    updateSaveStatus();
   };
 }
 
@@ -220,6 +259,26 @@ function deleteReport(id) {
       loadRecords();
     };
   }
+}
+
+// -----------------------------
+// Archive/Unarchive report
+// -----------------------------
+function toggleArchive(id, newStatus) {
+  const tx = db.transaction("reports", "readwrite");
+  const store = tx.objectStore("reports");
+  const req = store.get(id);
+
+  req.onsuccess = () => {
+    const report = req.result;
+    if (!report) return;
+    report.archived = newStatus;
+    store.put(report);
+
+    tx.oncomplete = () => {
+      loadRecords();
+    };
+  };
 }
 
 // -----------------------------
@@ -253,14 +312,22 @@ function exportPDF(report) {
 }
 
 // -----------------------------
-// Navigation
+// Navigation & Save status
 // -----------------------------
 function showForm() {
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "block";
   document.getElementById("records-section").style.display = "none";
 }
 
 function showRecords() {
+  if (isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
   document.getElementById("form-section").style.display = "none";
   document.getElementById("records-section").style.display = "block";
+}
+
+function updateSaveStatus() {
+  const statusEl = document.getElementById("save-status");
+  statusEl.textContent = isDirty ? "Not Saved" : "Saved";
+  statusEl.style.color = isDirty ? "red" : "lime";
 }
