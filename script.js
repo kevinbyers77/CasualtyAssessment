@@ -3,7 +3,7 @@ let isDirty = false;
 
 // IndexedDB setup
 let db;
-const request = indexedDB.open("casualtyDB", 2);
+const request = indexedDB.open("casualtyDB", 1);
 
 request.onupgradeneeded = (e) => {
   db = e.target.result;
@@ -17,71 +17,92 @@ request.onsuccess = (e) => {
   loadRecords();
 };
 
-request.onerror = (e) => console.error("DB error:", e);
+request.onerror = (e) => {
+  console.error("IndexedDB error:", e);
+};
 
-// Track unsaved changes
-document.addEventListener("input", () => {
-  isDirty = true;
-  updateSaveStatus();
-});
-
+// Track dirty state
 function updateSaveStatus() {
   const status = document.getElementById("save-status");
-  if (document.getElementById("form-section").style.display === "block") {
-    status.textContent = isDirty ? "Not Saved" : "Saved";
-    status.style.color = isDirty ? "red" : "limegreen";
+  if (isDirty) {
+    status.textContent = "Not Saved";
+    status.style.color = "red";
   } else {
-    status.textContent = "";
+    status.textContent = "Saved";
+    status.style.color = "lightgreen";
   }
 }
 
-function toggleRecurring(show) {
-  document.getElementById("recurringDateField").style.display = show ? "block" : "none";
+function markDirty() {
+  isDirty = true;
+  updateSaveStatus();
 }
 
-// -------------------- OBSERVATIONS TABLE --------------------
+// Form handling
+const form = document.getElementById("casualty-form");
+form.addEventListener("input", markDirty);
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  saveReport();
+});
 
-function addObservationRow(data = {}) {
-  const tbody = document.querySelector("#observations-table tbody");
-  const row = document.createElement("tr");
+// Signature pad
+const canvas = document.getElementById("signature-pad");
+const ctx = canvas.getContext("2d");
+let drawing = false;
 
-  row.innerHTML = `
-    <td><input type="time" value="${data.time || ""}"></td>
-    <td><input type="number" value="${data.pulse || ""}"></td>
-    <td><input type="text" value="${data.bp || ""}"></td>
-    <td><input type="number" value="${data.breaths || ""}"></td>
-    <td><input type="number" min="1" max="15" value="${data.gcs || ""}"></td>
-    <td><select><option></option>${[1,2,3,4,5].map(v => `<option ${data.pupilL==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select><option></option>${[1,2,3,4,5].map(v => `<option ${data.pupilR==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select><option></option><option ${data.reactL=="Yes"?"selected":""}>Yes</option><option ${data.reactL=="No"?"selected":""}>No</option></select></td>
-    <td><select><option></option><option ${data.reactR=="Yes"?"selected":""}>Yes</option><option ${data.reactR=="No"?"selected":""}>No</option></select></td>
-    <td><button type="button" onclick="this.closest('tr').remove()">Delete</button></td>
-  `;
-
-  tbody.appendChild(row);
+function getPos(e) {
+  if (e.touches && e.touches[0]) {
+    return { x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
+             y: e.touches[0].clientY - canvas.getBoundingClientRect().top };
+  } else {
+    return { x: e.offsetX, y: e.offsetY };
+  }
 }
 
-function getObservations() {
-  const rows = document.querySelectorAll("#observations-table tbody tr");
-  return Array.from(rows).map(row => {
-    const cells = row.querySelectorAll("td input, td select");
-    return {
-      time: cells[0].value,
-      pulse: cells[1].value,
-      bp: cells[2].value,
-      breaths: cells[3].value,
-      gcs: cells[4].value,
-      pupilL: cells[5].value,
-      pupilR: cells[6].value,
-      reactL: cells[7].value,
-      reactR: cells[8].value
-    };
-  });
+canvas.addEventListener("mousedown", (e) => {
+  drawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener("mouseup", () => (drawing = false));
+canvas.addEventListener("mousemove", (e) => {
+  if (!drawing) return;
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  markDirty();
+});
+
+// Touch support
+canvas.addEventListener("touchstart", (e) => {
+  drawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener("touchend", () => (drawing = false));
+canvas.addEventListener("touchmove", (e) => {
+  if (!drawing) return;
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  e.preventDefault();
+  markDirty();
+}, { passive: false });
+
+function clearSignature() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  markDirty();
 }
 
-// -------------------- BODY DIAGRAMS --------------------
+document.getElementById("clear-signature").addEventListener("click", clearSignature);
 
-function initDiagram(canvasId, view, imgSrc) {
+// Diagram handling
+const injuryCodes = ["A","L","B","P","S","O","Am","C","T","D","E"];
+
+function initDiagram(canvasId, imgSrc) {
   const canvas = document.getElementById(canvasId);
   const ctx = canvas.getContext("2d");
   const markers = [];
@@ -105,7 +126,6 @@ function initDiagram(canvasId, view, imgSrc) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Create dropdown dynamically
     const dropdown = document.createElement("select");
     injuryCodes.forEach(code => {
       const opt = document.createElement("option");
@@ -123,101 +143,69 @@ function initDiagram(canvasId, view, imgSrc) {
       markers.push({x, y, code: dropdown.value});
       redraw();
       dropdown.remove();
-      isDirty = true;
-      updateSaveStatus();
+      markDirty();
     });
   });
 
   return {
     get: () => markers,
     set: (arr) => { markers.length = 0; arr.forEach(m => markers.push(m)); redraw(); },
-    undo: () => { markers.pop(); redraw(); }
+    undo: () => { markers.pop(); redraw(); markDirty(); }
   };
 }
 
-const frontDiagram = initDiagram("diagram-front", "front", "docs/front.png");
-const backDiagram  = initDiagram("diagram-back", "back", "docs/back.png");
+const frontDiagram = initDiagram("diagram-front", "docs/front.png");
+const backDiagram  = initDiagram("diagram-back", "docs/back.png");
 
 document.getElementById("undo-front").addEventListener("click", () => frontDiagram.undo());
 document.getElementById("undo-back").addEventListener("click", () => backDiagram.undo());
 
-// -------------------- SIGNATURE --------------------
-
-const signatureCanvas = document.getElementById("signature-pad");
-const sigCtx = signatureCanvas.getContext("2d");
-signatureCanvas.width = 300;
-signatureCanvas.height = 120;
-
-let drawing = false;
-signatureCanvas.addEventListener("mousedown", e => {drawing = true; sigCtx.beginPath(); sigCtx.moveTo(e.offsetX,e.offsetY);});
-signatureCanvas.addEventListener("mouseup", ()=>drawing=false);
-signatureCanvas.addEventListener("mousemove", e => {if(drawing){sigCtx.lineTo(e.offsetX,e.offsetY);sigCtx.stroke();}});
-signatureCanvas.addEventListener("touchstart", e => {drawing=true; const t=e.touches[0]; sigCtx.beginPath(); sigCtx.moveTo(t.clientX-signatureCanvas.offsetLeft, t.clientY-signatureCanvas.offsetTop);});
-signatureCanvas.addEventListener("touchend", ()=>drawing=false);
-signatureCanvas.addEventListener("touchmove", e => {if(drawing){const t=e.touches[0];sigCtx.lineTo(t.clientX-signatureCanvas.offsetLeft, t.clientY-signatureCanvas.offsetTop);sigCtx.stroke();e.preventDefault();}}, {passive:false});
-
-function clearSignature() {
-  sigCtx.clearRect(0,0,signatureCanvas.width,signatureCanvas.height);
-}
-
-// -------------------- SAVE/LOAD --------------------
-
+// Save report
 function saveReport() {
+  const signature = canvas.toDataURL();
+
+  const injuries = Array.from(document.querySelectorAll("input[name='injuries']:checked"))
+    .map(cb => cb.value);
+
+  const fluidInjury = document.querySelector("input[name='fluidInjury']:checked")?.value || "";
+  const breathSounds = Array.from(document.querySelectorAll("input[name='breathSounds']:checked"))
+    .map(cb => cb.value);
+
   const report = {
-    id: currentEditId || undefined,
     patientName: document.getElementById("patientName").value,
     dob: document.getElementById("dob").value,
-    gender: document.getElementById("gender").value,
-    injuryDate: document.getElementById("injuryDate").value,
-    injuryTime: document.getElementById("injuryTime").value,
-    homeAddress: document.getElementById("homeAddress").value,
-    town: document.getElementById("town").value,
-    state: document.getElementById("state").value,
-    postcode: document.getElementById("postcode").value,
-    employeeNo: document.getElementById("employeeNo").value,
-    contractor: document.getElementById("contractor").value,
-    occupation: document.getElementById("occupation").value,
-    shiftStart: document.getElementById("shiftStart").value,
-    injuryLocation: document.getElementById("injuryLocation").value,
-    history: document.getElementById("history").value,
-    recurring: document.querySelector("input[name='recurring']:checked")?.value || "No",
-    recurringDate: document.getElementById("recurringDate").value,
-    danger: document.getElementById("danger").checked,
-    response: document.getElementById("response").value,
-    help000: document.getElementById("help000").checked,
-    help112: document.getElementById("help112").checked,
-    airway: document.getElementById("airway").value,
-    breathing: document.getElementById("breathing").value,
-    signsOfLife: document.getElementById("signsOfLife").value,
-    observations: getObservations(),
-    diagramFront: frontDiagram.get(),
-    diagramBack: backDiagram.get(),
-    remember: document.querySelector("input[name='remember']:checked")?.value || "",
-    hurtMost: document.getElementById("hurtMost").value,
-    painRating: document.getElementById("painRating").value,
-    deepBreath: document.querySelector("input[name='deepBreath']:checked")?.value || "",
-    allergies: document.querySelector("input[name='allergies']:checked")?.value || "No",
-    allergyDetails: document.getElementById("allergyDetails").value,
-    illnesses: Array.from(document.querySelectorAll(".illness:checked")).map(c=>c.value),
-    regularMeds: document.getElementById("regularMeds").value,
-    todayMeds: document.getElementById("todayMeds").value,
     heartRate: document.getElementById("heartRate").value,
     bloodPressure: document.getElementById("bloodPressure").value,
     treatment: document.getElementById("treatment").value,
-    signature: signatureCanvas.toDataURL(),
-    signerName: document.getElementById("signerName").value,
+    history: document.getElementById("history").value,
+    recurring: document.querySelector("input[name='recurring']:checked")?.value || "",
+    signature,
+    injuries,
+    fluidInjury,
+    breathSounds,
+    diagrams: {
+      front: frontDiagram.get(),
+      back: backDiagram.get()
+    },
     created: new Date().toISOString(),
-    archived: false
+    id: currentEditId || undefined
   };
 
-  const tx = db.transaction("reports","readwrite");
+  const tx = db.transaction("reports", "readwrite");
   const store = tx.objectStore("reports");
-  currentEditId ? store.put(report) : store.add(report);
+
+  if (currentEditId) {
+    store.put(report);
+  } else {
+    store.add(report);
+  }
 
   tx.oncomplete = () => {
-    alert("Report saved!");
+    alert(currentEditId ? "Report updated!" : "Report saved!");
     form.reset();
     clearSignature();
+    frontDiagram.set([]);
+    backDiagram.set([]);
     currentEditId = null;
     isDirty = false;
     updateSaveStatus();
@@ -225,104 +213,193 @@ function saveReport() {
   };
 }
 
-const form = document.getElementById("casualty-form");
-form.addEventListener("submit", e => {e.preventDefault(); saveReport();});
-
-// -------------------- LOAD RECORDS --------------------
-
+// Load saved records
 function loadRecords() {
-  const list = document.getElementById("records-list");
+  const activeList = document.getElementById("records-list");
   const archivedList = document.getElementById("archived-list");
-  list.innerHTML = "";
+  activeList.innerHTML = "";
   archivedList.innerHTML = "";
 
-  const tx = db.transaction("reports","readonly");
+  const tx = db.transaction("reports", "readonly");
   const store = tx.objectStore("reports");
 
-  store.openCursor().onsuccess = e => {
+  store.openCursor().onsuccess = (e) => {
     const cursor = e.target.result;
-    if(cursor){
+    if (cursor) {
       const report = cursor.value;
       const li = document.createElement("li");
-      li.textContent = `${report.patientName} (${report.created})`;
-      const editBtn=document.createElement("button");
-      editBtn.textContent="Edit"; editBtn.onclick=()=>editReport(report.id);
+      li.textContent = `${report.patientName} (Created: ${report.created})`;
+
+      const pdfBtn = document.createElement("button");
+      pdfBtn.textContent = "Export PDF";
+      pdfBtn.className = "btn-pdf";
+      pdfBtn.onclick = () => exportPDF(report);
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Edit";
+      editBtn.className = "btn-edit";
+      editBtn.onclick = () => editReport(report.id);
+
+      const archiveBtn = document.createElement("button");
+      archiveBtn.textContent = report.archived ? "Unarchive" : "Archive";
+      archiveBtn.className = "btn-archive";
+      archiveBtn.onclick = () => toggleArchive(report.id, !report.archived);
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+      delBtn.className = "btn-delete";
+      delBtn.onclick = () => {
+        if (confirm("Are you sure you want to delete this report?")) {
+          deleteReport(report.id);
+        }
+      };
+
+      li.appendChild(pdfBtn);
       li.appendChild(editBtn);
-      (report.archived?archivedList:list).appendChild(li);
+      li.appendChild(archiveBtn);
+      li.appendChild(delBtn);
+
+      if (report.archived) {
+        archivedList.appendChild(li);
+      } else {
+        activeList.appendChild(li);
+      }
+
       cursor.continue();
     }
   };
 }
 
-function editReport(id){
-  const tx=db.transaction("reports","readonly");
-  const store=tx.objectStore("reports");
-  const req=store.get(id);
-  req.onsuccess=()=>{
-    const r=req.result; if(!r) return;
-    currentEditId=r.id;
-    document.getElementById("patientName").value=r.patientName||"";
-    document.getElementById("dob").value=r.dob||"";
-    document.getElementById("gender").value=r.gender||"";
-    document.getElementById("injuryDate").value=r.injuryDate||"";
-    document.getElementById("injuryTime").value=r.injuryTime||"";
-    document.getElementById("homeAddress").value=r.homeAddress||"";
-    document.getElementById("town").value=r.town||"";
-    document.getElementById("state").value=r.state||"";
-    document.getElementById("postcode").value=r.postcode||"";
-    document.getElementById("employeeNo").value=r.employeeNo||"";
-    document.getElementById("contractor").value=r.contractor||"";
-    document.getElementById("occupation").value=r.occupation||"";
-    document.getElementById("shiftStart").value=r.shiftStart||"";
-    document.getElementById("injuryLocation").value=r.injuryLocation||"";
-    document.getElementById("history").value=r.history||"";
-    if(r.recurring==="Yes"){document.querySelector("input[name='recurring'][value='Yes']").checked=true;toggleRecurring(true);document.getElementById("recurringDate").value=r.recurringDate||"";}
-    else{document.querySelector("input[name='recurring'][value='No']").checked=true;toggleRecurring(false);}
-    document.getElementById("danger").checked=r.danger||false;
-    document.getElementById("response").value=r.response||"";
-    document.getElementById("help000").checked=r.help000||false;
-    document.getElementById("help112").checked=r.help112||false;
-    document.getElementById("airway").value=r.airway||"";
-    document.getElementById("breathing").value=r.breathing||"";
-    document.getElementById("signsOfLife").value=r.signsOfLife||"";
-    document.querySelector("#observations-table tbody").innerHTML="";
-    (r.observations||[]).forEach(o=>addObservationRow(o));
-    frontDiagram.set(r.diagramFront||[]);
-    backDiagram.set(r.diagramBack||[]);
-    if(r.remember){document.querySelector(`input[name='remember'][value='${r.remember}']`).checked=true;}
-    document.getElementById("hurtMost").value=r.hurtMost||"";
-    document.getElementById("painRating").value=r.painRating||"";
-    if(r.deepBreath){document.querySelector(`input[name='deepBreath'][value='${r.deepBreath}']`).checked=true;}
-    if(r.allergies){document.querySelector(`input[name='allergies'][value='${r.allergies}']`).checked=true;}
-    document.getElementById("allergyDetails").value=r.allergyDetails||"";
-    document.querySelectorAll(".illness").forEach(c=>{c.checked=(r.illnesses||[]).includes(c.value);});
-    document.getElementById("regularMeds").value=r.regularMeds||"";
-    document.getElementById("todayMeds").value=r.todayMeds||"";
-    document.getElementById("heartRate").value=r.heartRate||"";
-    document.getElementById("bloodPressure").value=r.bloodPressure||"";
-    document.getElementById("treatment").value=r.treatment||"";
-    const img=new Image();
-    img.onload=()=>{clearSignature();sigCtx.drawImage(img,0,0,signatureCanvas.width,signatureCanvas.height);};
-    img.src=r.signature||"";
-    document.getElementById("signerName").value=r.signerName||"";
+function editReport(id) {
+  const tx = db.transaction("reports", "readonly");
+  const store = tx.objectStore("reports");
+  const req = store.get(id);
+
+  req.onsuccess = () => {
+    const report = req.result;
+    if (!report) return;
+
+    document.getElementById("patientName").value = report.patientName || "";
+    document.getElementById("dob").value = report.dob || "";
+    document.getElementById("heartRate").value = report.heartRate || "";
+    document.getElementById("bloodPressure").value = report.bloodPressure || "";
+    document.getElementById("treatment").value = report.treatment || "";
+    document.getElementById("history").value = report.history || "";
+
+    if (report.recurring) {
+      document.querySelector(`input[name='recurring'][value='${report.recurring}']`).checked = true;
+    }
+
+    document.querySelectorAll("input[name='injuries']").forEach(cb => {
+      cb.checked = report.injuries?.includes(cb.value) || false;
+    });
+
+    if (report.fluidInjury) {
+      document.querySelector(`input[name='fluidInjury'][value='${report.fluidInjury}']`).checked = true;
+    }
+
+    document.querySelectorAll("input[name='breathSounds']").forEach(cb => {
+      cb.checked = report.breathSounds?.includes(cb.value) || false;
+    });
+
+    frontDiagram.set(report.diagrams?.front || []);
+    backDiagram.set(report.diagrams?.back || []);
+
+    if (report.signature) {
+      const img = new Image();
+      img.onload = () => {
+        clearSignature();
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = report.signature;
+    }
+
+    currentEditId = report.id;
     showForm();
-  }
+    isDirty = false;
+    updateSaveStatus();
+  };
 }
 
-// -------------------- NAVIGATION --------------------
+// Archive toggle
+function toggleArchive(id, archive) {
+  const tx = db.transaction("reports", "readwrite");
+  const store = tx.objectStore("reports");
+  const req = store.get(id);
 
-function showForm(){if(isDirty&&!confirm("You have unsaved changes. Leave without saving?"))return;
- document.getElementById("form-section").style.display="block";
- document.getElementById("records-section").style.display="none";
- document.getElementById("archived-section").style.display="none";
- isDirty=false;updateSaveStatus();}
+  req.onsuccess = () => {
+    const report = req.result;
+    report.archived = archive;
+    store.put(report);
+    loadRecords();
+  };
+}
 
-function showRecords(){if(isDirty&&!confirm("You have unsaved changes. Leave without saving?"))return;
- document.getElementById("form-section").style.display="none";
- document.getElementById("records-section").style.display="block";
- document.getElementById("archived-section").style.display="none";updateSaveStatus();}
+// Delete
+function deleteReport(id) {
+  const tx = db.transaction("reports", "readwrite");
+  tx.objectStore("reports").delete(id);
+  tx.oncomplete = () => loadRecords();
+}
 
-function showArchived(){if(isDirty&&!confirm("You have unsaved changes. Leave without saving?"))return;
- document.getElementById("form-section").style.display="none";
- document.getElementById("records-section").style.display="none";
- document.getElementById("archived-section").style.display="block";updateSaveStatus();}
+// Export PDF
+function exportPDF(report) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Casualty Assessment Report", 10, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Patient: ${report.patientName}`, 10, 40);
+  doc.text(`DOB: ${report.dob}`, 10, 50);
+  doc.text(`Heart Rate: ${report.heartRate}`, 10, 60);
+  doc.text(`Blood Pressure: ${report.bloodPressure}`, 10, 70);
+  doc.text(`Treatment Notes:`, 10, 80);
+  doc.text(report.treatment || "", 10, 90, { maxWidth: 180 });
+
+  doc.text(`History: ${report.history || ""}`, 10, 110, { maxWidth: 180 });
+  doc.text(`Recurring: ${report.recurring || ""}`, 10, 125);
+  doc.text(`Injuries: ${report.injuries?.join(", ") || "None"}`, 10, 135);
+  doc.text(`Fluid/Air Injury: ${report.fluidInjury || "No"}`, 10, 145);
+  doc.text(`Breath Sounds: ${report.breathSounds?.join(", ") || "None"}`, 10, 155);
+
+  if (report.signature) {
+    doc.text("Signature:", 10, 170);
+    doc.addImage(report.signature, "PNG", 40, 160, 50, 25);
+  }
+
+  doc.save(`casualty_report_${report.patientName}.pdf`);
+}
+
+// Navigation
+function setActiveTab(tabId) {
+  document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active-tab"));
+  document.getElementById(tabId).classList.add("active-tab");
+}
+
+function showForm() {
+  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  document.getElementById("form-section").style.display = "block";
+  document.getElementById("records-section").style.display = "none";
+  document.getElementById("archived-section").style.display = "none";
+  setActiveTab("btn-new");
+}
+
+function showRecords() {
+  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  document.getElementById("form-section").style.display = "none";
+  document.getElementById("records-section").style.display = "block";
+  document.getElementById("archived-section").style.display = "none";
+  setActiveTab("btn-saved");
+}
+
+function showArchived() {
+  if (isDirty && !confirm("You have unsaved changes on this report. Do you want to leave without saving?")) return;
+  document.getElementById("form-section").style.display = "none";
+  document.getElementById("records-section").style.display = "none";
+  document.getElementById("archived-section").style.display = "block";
+  setActiveTab("btn-archived");
+}
+
+updateSaveStatus();
