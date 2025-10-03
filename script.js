@@ -292,39 +292,6 @@ function editReport(id){
 }
 
 /***********************
- * NAVIGATION
- ***********************/
-function showForm() {
-  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
-    return;
-  }
-  document.getElementById("form-section").style.display = "block";
-  document.getElementById("records-section").style.display = "none";
-  document.getElementById("archived-section").style.display = "none";
-  setActiveTab("btn-new");
-}
-
-function showRecords() {
-  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
-    return;
-  }
-  document.getElementById("form-section").style.display = "none";
-  document.getElementById("records-section").style.display = "block";
-  document.getElementById("archived-section").style.display = "none";
-  setActiveTab("btn-saved");
-}
-
-function showArchived() {
-  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
-    return;
-  }
-  document.getElementById("form-section").style.display = "none";
-  document.getElementById("records-section").style.display = "none";
-  document.getElementById("archived-section").style.display = "block";
-  setActiveTab("btn-archived");
-}
-
-/***********************
  * LISTS / ACTIONS
  ***********************/
 function loadRecords(){
@@ -359,6 +326,7 @@ function loadRecords(){
     cursor.continue();
   };
 }
+
 function toggleArchive(id, toArchive){
   const tx = db.transaction("reports","readwrite");
   const store = tx.objectStore("reports");
@@ -375,7 +343,43 @@ function deleteReport(id){
 }
 
 /***********************
- * NAVIGATION
+ * EXPORT PDF (simple summary)
+ ***********************/
+function exportPDF(report){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("Casualty Assessment Report", 10, 16);
+  doc.setFontSize(11);
+
+  const lines = [
+    `Patient: ${report.patientName || ""}`,
+    `DOB: ${report.dob || ""}   Gender: ${report.gender || ""}`,
+    `Injury: ${report.injuryDate || ""} ${report.injuryTime || ""}`,
+    `Location: ${report.injuryLocation || ""}`,
+    `Heart Rate: ${report.heartRate || ""}   BP: ${report.bloodPressure || ""}`,
+    `History: ${report.history || ""}`,
+    `Recurring: ${report.recurring || ""}  Original: ${report.recurringDate || ""}`,
+    `Fluid/Air Injection Injury: ${report.fluidInjury || ""}`,
+    `Breath Sounds: ${(report.breathSounds||[]).join(", ")}`,
+    `Pain rating: ${report.painRating || ""}  Deep breath: ${report.deepBreath || ""}`,
+    `Allergies: ${report.allergies || ""}  ${report.allergyDetails || ""}`,
+    `Illnesses: ${(report.illnesses||[]).join(", ")}`,
+    `Regular meds: ${report.regularMeds || ""}`,
+    `Meds today: ${report.todayMeds || ""}`
+  ];
+  let y = 26;
+  lines.forEach(l=>{ doc.text(l, 10, y); y+=6; });
+
+  if(report.signature){
+    doc.text("Signature:", 10, y+6);
+    doc.addImage(report.signature, "PNG", 30, y, 50, 25);
+  }
+  doc.save(`casualty_report_${(report.patientName||"").replace(/\s+/g,'_')}.pdf`);
+}
+
+/***********************
+ * NAVIGATION  (single, unified)
  ***********************/
 function showForm(){
   if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
