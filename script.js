@@ -292,6 +292,39 @@ function editReport(id){
 }
 
 /***********************
+ * NAVIGATION
+ ***********************/
+function showForm() {
+  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
+    return;
+  }
+  document.getElementById("form-section").style.display = "block";
+  document.getElementById("records-section").style.display = "none";
+  document.getElementById("archived-section").style.display = "none";
+  setActiveTab("btn-new");
+}
+
+function showRecords() {
+  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
+    return;
+  }
+  document.getElementById("form-section").style.display = "none";
+  document.getElementById("records-section").style.display = "block";
+  document.getElementById("archived-section").style.display = "none";
+  setActiveTab("btn-saved");
+}
+
+function showArchived() {
+  if (isDirty && !confirm("You have unsaved changes. Do you want to leave this form?")) {
+    return;
+  }
+  document.getElementById("form-section").style.display = "none";
+  document.getElementById("records-section").style.display = "none";
+  document.getElementById("archived-section").style.display = "block";
+  setActiveTab("btn-archived");
+}
+
+/***********************
  * LISTS / ACTIONS
  ***********************/
 function loadRecords(){
