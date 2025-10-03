@@ -411,3 +411,13 @@ function showArchived(){
 // Initial view
 setActiveTab("btn-saved");
 updateSaveStatus();
+
+/***********************
+ * EVENT LISTENERS
+ ***********************/
+document.getElementById("btn-new").addEventListener("click", showForm);
+document.getElementById("btn-saved").addEventListener("click", showRecords);
+document.getElementById("btn-archived").addEventListener("click", showArchived);
+
+// Default view
+showRecords();
