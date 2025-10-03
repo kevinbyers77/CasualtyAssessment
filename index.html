@@ -27,6 +27,7 @@
         <!-- Patient Information -->
         <fieldset>
           <legend>Patient Information</legend>
+
           <div class="row">
             <label>Name <input type="text" id="patientName"></label>
             <label>DOB <input type="date" id="dob"></label>
@@ -38,12 +39,14 @@
               </select>
             </label>
           </div>
+
           <div class="row">
             <label>Home Address <input type="text" id="homeAddress"></label>
             <label>Town <input type="text" id="town"></label>
             <label>State <input type="text" id="state"></label>
             <label>Postcode <input type="text" id="postcode"></label>
           </div>
+
           <div class="row">
             <label>Employee No <input type="text" id="employeeNo"></label>
             <label>Contractor <input type="text" id="contractor"></label>
@@ -65,14 +68,16 @@
         <!-- History -->
         <fieldset>
           <legend>History of Injury/Illness</legend>
-          <label for="history" class="full-width">
+
+          <label for="history">
             What job was being done? Environmental conditions? Who witnessed? How did the injury occur?
           </label>
           <textarea id="history"></textarea>
+
           <div class="row">
             <label>
               Recurring Injury?
-              <span class="radio-group">
+              <span class="radio-group" style="margin-top:.25rem;">
                 <label><input type="radio" name="recurring" value="Yes"> Yes</label>
                 <label><input type="radio" name="recurring" value="No"> No</label>
               </span>
@@ -86,13 +91,15 @@
         <!-- Primary Assessment -->
         <fieldset>
           <legend>Primary Assessment</legend>
+
           <div class="row">
             <label>
-              <span class="inline-input">
+              <span style="display:flex; gap:.5rem; align-items:center;">
                 <input type="checkbox" id="danger"> Danger
-                <input type="text" id="dangerDetails" placeholder="Details">
+                <input type="text" id="dangerDetails" placeholder="Details" style="max-width:260px;">
               </span>
             </label>
+
             <label>Response 
               <select id="response">
                 <option></option>
@@ -101,6 +108,7 @@
                 <option>Unconscious</option>
               </select>
             </label>
+
             <label>Airway 
               <select id="airway">
                 <option></option>
@@ -109,6 +117,7 @@
                 <option>Guedel</option>
               </select>
             </label>
+
             <label>Breathing 
               <select id="breathing">
                 <option></option>
@@ -117,6 +126,7 @@
                 <option>Absent</option>
               </select>
             </label>
+
             <label>Signs of Life 
               <select id="signsOfLife">
                 <option></option>
@@ -126,11 +136,37 @@
               </select>
             </label>
           </div>
+
+          <div class="row">
+            <label>
+              Compressions:
+              <span class="radio-group" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox" name="compressions" value="centre"> Centre of chest</label>
+                <label><input type="checkbox" name="compressions" value="30to2"> 30 to 2</label>
+                <label><input type="checkbox" name="compressions" value="100permin"> 100 per min</label>
+              </span>
+            </label>
+          </div>
+
+          <div class="row">
+            <label>
+              Defibrillation:
+              <span class="radio-group" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:.25rem;">
+                <label><input type="radio" name="defib" value="notRequired"> Not required</label>
+                <label><input type="radio" name="defib" value="required"> Required</label>
+                <label><input type="radio" name="defib" value="noShock"> No shock</label>
+              </span>
+            </label>
+            <label>No. of shocks
+              <input type="number" id="defibShocks" min="0">
+            </label>
+          </div>
         </fieldset>
 
         <!-- Casualty Observations -->
         <fieldset>
           <legend>Casualty Observations</legend>
+
           <table id="observations-table">
             <thead>
               <tr>
@@ -138,25 +174,210 @@
                 <th>Pupil L</th><th>Pupil R</th><th>React L</th><th>React R</th><th>Action</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr>
+                <td><input type="time"></td>
+                <td><input type="number"></td>
+                <td><input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number" min="1" max="15"></td>
+                <td>
+                  <select>
+                    <option></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                  </select>
+                </td>
+                <td>
+                  <select>
+                    <option></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                  </select>
+                </td>
+                <td>
+                  <select>
+                    <option></option><option>Yes</option><option>No</option>
+                  </select>
+                </td>
+                <td>
+                  <select>
+                    <option></option><option>Yes</option><option>No</option>
+                  </select>
+                </td>
+                <td><button type="button" class="btn-outline">Delete</button></td>
+              </tr>
+            </tbody>
           </table>
+
           <button type="button" id="add-observation" class="btn-small">+ Add Observation</button>
         </fieldset>
 
-        <!-- Secondary Assessment -->
+        <!-- Secondary Assessment (Body Diagrams) -->
         <fieldset>
           <legend>Secondary Assessment</legend>
-          <div class="injury-diagrams">
-            <div class="diagram" id="front-wrap">
+
+          <div class="row">
+            <div id="front-wrap">
               <canvas id="diagram-front" width="250" height="400"></canvas>
               <div class="diagram-controls"><button type="button" onclick="frontDiagram.undo()">Undo</button></div>
             </div>
-            <div class="diagram" id="back-wrap">
+
+            <div id="back-wrap">
               <canvas id="diagram-back" width="250" height="400"></canvas>
               <div class="diagram-controls"><button type="button" onclick="backDiagram.undo()">Undo</button></div>
             </div>
           </div>
-          <p class="diagram-label"><strong>Injury Codes:</strong> A – Abrasion, L – Laceration, B – Bruise, P – Puncture, S – Swelling, O – Other, Am – Amputation, C – Crush, T – Tenderness, D – Deformity, E – Embedded</p>
+
+          <p><strong>Injury Codes:</strong> A – Abrasion, L – Laceration, B – Bruise, P – Puncture, S – Swelling, O – Other, Am – Amputation, C – Crush, T – Tenderness, D – Deformity, E – Embedded</p>
+
+          <div class="row">
+            <label>Burns:
+              <span class="radio-group" style="display:flex; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox"> Full</label>
+                <label><input type="checkbox"> Partial</label>
+                <label><input type="checkbox"> Superficial</label>
+              </span>
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Fluid/Air Injection Injury: 
+              <span class="radio-group" style="display:flex; gap:1rem; margin-top:.25rem;">
+                <label><input type="radio" name="fluidInjury" value="Yes"> Yes</label>
+                <label><input type="radio" name="fluidInjury" value="No"> No</label>
+              </span>
+            </label>
+
+            <label>
+              Breath Sounds:
+              <span class="radio-group" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox" name="breathSounds" value="Clear"> Clear</label>
+                <label><input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy</label>
+                <label><input type="checkbox" name="breathSounds" value="Decreased"> Decreased</label>
+                <label><input type="checkbox" name="breathSounds" value="Noisy"> Noisy</label>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Key Questions -->
+        <fieldset>
+          <legend>Key Questions</legend>
+          <div class="row">
+            <label>Remember what happened?
+              <span class="radio-group" style="display:flex; gap:1rem; margin-top:.25rem;">
+                <label><input type="radio" name="remember" value="Yes"> Yes</label>
+                <label><input type="radio" name="remember" value="No"> No</label>
+              </span>
+            </label>
+            <label>Where does it hurt most? <input type="text" id="hurtMost"></label>
+            <label>Pain rating (1–10) <input type="number" id="painRating" min="1" max="10"></label>
+            <label>Deep breath?
+              <span class="radio-group" style="display:flex; gap:1rem; margin-top:.25rem;">
+                <label><input type="radio" name="deepBreath" value="Yes"> Yes</label>
+                <label><input type="radio" name="deepBreath" value="No"> No</label>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Allergies -->
+        <fieldset>
+          <legend>Allergies</legend>
+          <div class="row">
+            <label class="radio-group" style="display:flex; gap:1rem; align-items:center;">
+              <span>Allergies:</span>
+              <label><input type="radio" name="allergies" value="No"> No</label>
+              <label><input type="radio" name="allergies" value="Yes"> Yes</label>
+            </label>
+            <label>Details <input type="text" id="allergyDetails" placeholder="Details"></label>
+          </div>
+        </fieldset>
+
+        <!-- Previous Illness -->
+        <fieldset>
+          <legend>Previous Illness</legend>
+          <div class="row">
+            <label><input type="checkbox" value="Nil"> Nil</label>
+            <label><input type="checkbox" value="Unknown"> Unknown</label>
+            <label><input type="checkbox" class="illness" value="Cardiac"> Cardiac</label>
+            <label><input type="checkbox" class="illness" value="Diabetes"> Diabetes</label>
+            <label><input type="checkbox" class="illness" value="Epilepsy"> Epilepsy</label>
+            <label><input type="checkbox" class="illness" value="Respiratory"> Respiratory</label>
+            <label><input type="checkbox" class="illness" value="Hypertension"> Hypertension</label>
+            <label><input type="checkbox" class="illness" value="Renal"> Renal</label>
+            <label><input type="checkbox" class="illness" value="Stroke"> Stroke</label>
+            <label><input type="checkbox" class="illness" value="Psychological"> Psychological</label>
+          </div>
+        </fieldset>
+
+        <!-- Medications -->
+        <fieldset>
+          <legend>Medications</legend>
+          <div class="row">
+            <label>Regular medications <textarea id="regularMeds"></textarea></label>
+            <label>Medications taken today <textarea id="todayMeds"></textarea></label>
+          </div>
+        </fieldset>
+
+        <!-- First Aid Treatment -->
+        <fieldset>
+          <legend>First Aid Treatment</legend>
+          <textarea id="treatment"></textarea>
+        </fieldset>
+
+        <!-- Advanced Treatment -->
+        <fieldset>
+          <legend>Advanced Treatment</legend>
+          <div class="row">
+            <label>Penthrox:
+              <span class="radio-group" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox" id="penthYes"> Yes</label>
+                <label><input type="checkbox" id="penthNo"> No</label>
+                <label><input type="checkbox" id="penth3"> 3ml</label>
+                <label><input type="checkbox" id="penth6"> 6ml</label>
+              </span>
+            </label>
+            <label>Dose 1 Time: <input type="time" id="penthDose1"></label>
+            <label>Dose 2 Time: <input type="time" id="penthDose2"></label>
+          </div>
+
+          <div class="row">
+            <label>Oxygen:
+              <span class="radio-group" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox" id="oxygenYes"> Yes</label>
+                <label><input type="checkbox" id="oxygen8"> 8 ltrs</label>
+                <label><input type="checkbox" id="oxygen15"> 15 ltrs</label>
+                <label><input type="checkbox" id="oxygen15Resus"> 15 ltrs with Resus Bag & Reservoir</label>
+                <label><input type="checkbox" id="oxygenNo"> No</label>
+              </span>
+            </label>
+          </div>
+
+          <div class="row">
+            <label>Ventolin MDI with Spacer:
+              <span class="radio-group" style="display:flex; gap:1rem; margin-top:.25rem;">
+                <label><input type="checkbox" id="ventolinYes"> Yes</label>
+                <label><input type="checkbox" id="ventolinNo"> No</label>
+              </span>
+            </label>
+            <label>Start Time: <input type="time" id="ventolinTime"></label>
+          </div>
+
+          <div class="row">
+            <label>Fluid/Air Injection Injury Times:</label>
+            <label>Hand Unit Contacted: <input type="time" id="handUnitTime"></label>
+            <label>Aero Med Services Contacted: <input type="time" id="aeroTime"></label>
+          </div>
+        </fieldset>
+
+        <!-- Evacuation -->
+        <fieldset>
+          <legend>Evacuation</legend>
+          <div class="row">
+            <label><input type="checkbox" id="evacReturn"> Return to work after first aid</label>
+            <label><input type="checkbox" id="evacGP"> General Practitioner</label>
+            <label><input type="checkbox" id="evacHome"> Gone home</label>
+            <label><input type="checkbox" id="evacAmb"> Ambulance</label>
+            <label><input type="checkbox" id="evacHeli"> Helicopter</label>
+          </div>
         </fieldset>
 
         <!-- Signature -->
@@ -178,17 +399,20 @@
     </section>
 
     <!-- =======================
-         Records Sections
+         Records Section
     ======================= -->
-    <section id="records-section" style="display:none;">
-      <h2>Saved Reports</h2>
-      <ul id="records-list"></ul>
-    </section>
+<!-- Saved Reports Section -->
+<section id="records-section" style="display:none;">
+  <h2>Saved Reports</h2>
+  <ul id="records-list"></ul>
+</section>
 
-    <section id="archived-section" style="display:none;">
-      <h2>Archived Reports</h2>
-      <ul id="archived-list"></ul>
-    </section>
+<!-- Archived Reports Section -->
+<section id="archived-section" style="display:none;">
+  <h2>Archived Reports</h2>
+  <ul id="archived-list"></ul>
+</section>
+    
   </main>
 
   <script src="script.js"></script>
