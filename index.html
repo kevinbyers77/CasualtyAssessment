@@ -9,301 +9,294 @@
   <header>
     <h1>Casualty Assessment Report</h1>
     <nav>
-      <button id="btn-new" onclick="showForm()">New Report</button>
-      <button id="btn-saved" onclick="showRecords()">Saved Reports</button>
-      <button id="btn-archived" onclick="showArchived()">Archived Reports</button>
-      <span id="save-status"></span>
+      <button id="new-report">New Report</button>
+      <button id="saved-reports">Saved Reports</button>
+      <button id="archived-reports">Archived Reports</button>
     </nav>
+    <span id="save-status"></span>
   </header>
 
-  <!-- ================= FORM SECTION ================= -->
-  <section id="form-section">
-    <form id="casualty-form">
+  <main>
+    <!-- Form Section -->
+    <section id="form-section">
+      <form id="casualty-form">
 
-      <!-- Patient Information -->
-      <fieldset>
-        <legend>Patient Information</legend>
-        <div class="row">
-          <label>Name <input type="text" id="patientName"></label>
-          <label>DOB <input type="date" id="dob"></label>
-          <label>Gender 
-            <select id="gender">
-              <option></option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-          </label>
-          <label>Home Address <input type="text" id="homeAddress"></label>
-          <label>Town <input type="text" id="town"></label>
-          <label>State <input type="text" id="state"></label>
-          <label>Postcode <input type="text" id="postcode"></label>
-          <label>Employee No <input type="text" id="employeeNo"></label>
-          <label>Contractor <input type="text" id="contractor"></label>
-          <label>Occupation <input type="text" id="occupation"></label>
-          <label>Shift Start <input type="time" id="shiftStart"></label>
-        </div>
-      </fieldset>
-
-      <!-- Injury Details -->
-      <fieldset>
-        <legend>Injury Details</legend>
-        <div class="row">
-          <label>Date <input type="date" id="injuryDate"></label>
-          <label>Time <input type="time" id="injuryTime"></label>
-          <label>Location <input type="text" id="injuryLocation"></label>
-        </div>
-      </fieldset>
-
-      <!-- History -->
-      <fieldset>
-        <legend>History of Injury/Illness</legend>
-        <textarea id="history" placeholder="What job was being done? Environmental conditions? Who witnessed? How did the injury occur?"></textarea>
-        <div class="row">
-          <label>Recurring Injury? 
-            <input type="radio" name="recurring" value="Yes" onchange="toggleRecurring(true)"> Yes
-            <input type="radio" name="recurring" value="No" onchange="toggleRecurring(false)"> No
-          </label>
-          <label id="recurringDateField" style="display:none;">Date of original: <input type="date" id="recurringDate"></label>
-        </div>
-      </fieldset>
-
-      <!-- Primary Assessment -->
-      <fieldset>
-        <legend>Primary Assessment of Casualty</legend>
-        <div class="row">
-          <label>Danger <input type="checkbox" id="danger"> <input type="text" placeholder="Details"></label>
-          <label>Response 
-            <select id="response">
-              <option></option>
-              <option>Conscious</option>
-              <option>Semi-conscious</option>
-              <option>Unconscious</option>
-            </select>
-          </label>
-          <label>Airway 
-            <select id="airway">
-              <option></option>
-              <option>Clear</option>
-              <option>Obstructed</option>
-              <option>Guedel</option>
-            </select>
-          </label>
-          <label>Breathing 
-            <select id="breathing">
-              <option></option>
-              <option>Normal</option>
-              <option>Abnormal</option>
-              <option>Absent</option>
-            </select>
-          </label>
-          <label>Signs of Life 
-            <select id="signsOfLife">
-              <option></option>
-              <option>Pink</option>
-              <option>Pale</option>
-              <option>Cyanosed</option>
-            </select>
-          </label>
-        </div>
-        <div class="row">
-          <label>Compressions: Centre of chest, 30 to 2, 100 per min</label>
-          <label>Defibrillation:
-            <input type="radio" name="defib" value="Not required"> Not required
-            <input type="radio" name="defib" value="Required"> Required
-            <input type="radio" name="defib" value="No shock"> No shock
-          </label>
-        </div>
-      </fieldset>
-
-      <!-- Observations -->
-      <fieldset>
-        <legend>Casualty Observations</legend>
-        <table id="observations-table">
-          <thead>
-            <tr>
-              <th>Time</th><th>Pulse</th><th>BP</th><th>Breaths</th><th>GCS</th>
-              <th>Pupil L</th><th>Pupil R</th><th>React L</th><th>React R</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <button type="button" onclick="addObservationRow()">Add Observation</button>
-        <div class="row">
-          <label>Sweating: 
-            <input type="radio" name="sweating" value="Nil"> Nil
-            <input type="radio" name="sweating" value="Mild"> Mild
-            <input type="radio" name="sweating" value="Profuse"> Profuse
-          </label>
-          <label>Skin Temp:
-            <input type="radio" name="skinTemp" value="Normal"> Normal
-            <input type="radio" name="skinTemp" value="Cool/Cold"> Cool/Cold
-            <input type="radio" name="skinTemp" value="Hot"> Hot
-          </label>
-          <label>Vomiting: <input type="text" id="vomiting"></label>
-          <label>Last Meal: <input type="time" id="lastMeal"></label>
-        </div>
-      </fieldset>
-
-      <!-- Secondary Assessment -->
-      <fieldset>
-        <legend>Secondary Assessment of Injuries</legend>
-        <div class="row">
-          <div class="injury-key">
-            <strong>Injury Codes</strong>
-            <ul>
-              <li>A – Abrasion</li>
-              <li>L – Laceration</li>
-              <li>B – Burn</li>
-              <li>P – Pain</li>
-              <li>S – Swelling</li>
-              <li>O – Open Fracture</li>
-              <li>Am – Amputation</li>
-              <li>C – Contusion</li>
-              <li>T – Tenderness</li>
-              <li>D – Deformity</li>
-              <li>E – Embedded Object</li>
-            </ul>
+        <!-- Patient Information -->
+        <fieldset>
+          <legend>Patient Information</legend>
+          <div class="row">
+            <label>Name <input type="text" id="patientName"></label>
+            <label>DOB <input type="date" id="dob"></label>
+            <label>Gender 
+              <select id="gender">
+                <option></option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </label>
+            <label>Home Address <input type="text" id="homeAddress"></label>
+            <label>Town <input type="text" id="town"></label>
+            <label>State <input type="text" id="state"></label>
+            <label>Postcode <input type="text" id="postcode"></label>
+            <label>Employee No <input type="text" id="employeeNo"></label>
+            <label>Contractor <input type="text" id="contractor"></label>
+            <label>Occupation <input type="text" id="occupation"></label>
+            <label>Shift Start <input type="time" id="shiftStart"></label>
           </div>
-          <div id="front-wrap"><canvas id="diagram-front" width="200" height="400"></canvas><button type="button" onclick="frontDiagram.undo()">Undo Last</button></div>
-          <div id="back-wrap"><canvas id="diagram-back" width="200" height="400"></canvas><button type="button" onclick="backDiagram.undo()">Undo Last</button></div>
-        </div>
-        <div class="row">
-          <label>Burn type:
-            <input type="checkbox" value="Full"> Full
-            <input type="checkbox" value="Partial"> Partial
-            <input type="checkbox" value="Superficial"> Superficial
+        </fieldset>
+
+        <!-- Injury Details -->
+        <fieldset>
+          <legend>Injury Details</legend>
+          <div class="row">
+            <label>Date <input type="date" id="injuryDate"></label>
+            <label>Time <input type="time" id="injuryTime"></label>
+            <label>Location <input type="text" id="injuryLocation"></label>
+          </div>
+        </fieldset>
+
+        <!-- History -->
+        <fieldset>
+          <legend>History of Injury/Illness</legend>
+          <label for="history">What job was being done? Environmental conditions? Who witnessed? How did the injury occur?</label>
+          <textarea id="history"></textarea>
+          <div>
+            <label>Recurring Injury?
+              <input type="radio" name="recurring" value="Yes"> Yes
+              <input type="radio" name="recurring" value="No"> No
+            </label>
+            <label>Date of original injury <input type="date" id="recurringDate"></label>
+          </div>
+        </fieldset>
+
+        <!-- Primary Assessment -->
+        <fieldset>
+          <legend>Primary Assessment</legend>
+          <div class="row">
+            <label><input type="checkbox" id="danger"> Danger</label>
+            <input type="text" id="dangerDetails" placeholder="Details">
+          </div>
+          <div class="row">
+            <label>Response 
+              <select id="response">
+                <option></option>
+                <option>Conscious</option>
+                <option>Semi-conscious</option>
+                <option>Unconscious</option>
+              </select>
+            </label>
+            <label>Airway 
+              <select id="airway">
+                <option></option>
+                <option>Clear</option>
+                <option>Obstructed</option>
+                <option>Guedel</option>
+              </select>
+            </label>
+            <label>Breathing 
+              <select id="breathing">
+                <option></option>
+                <option>Normal</option>
+                <option>Abnormal</option>
+                <option>Absent</option>
+              </select>
+            </label>
+            <label>Signs of Life 
+              <select id="signsOfLife">
+                <option></option>
+                <option>Pink</option>
+                <option>Pale</option>
+                <option>Cyanosed</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Compressions:
+              <input type="checkbox" name="compressions" value="centre"> Centre of chest
+              <input type="checkbox" name="compressions" value="30to2"> 30 to 2
+              <input type="checkbox" name="compressions" value="100permin"> 100 per min
+            </label>
+          </div>
+          <div class="row">
+            <label>Defibrillation:</label>
+            <label><input type="radio" name="defib" value="notRequired"> Not required</label>
+            <label><input type="radio" name="defib" value="required"> Required</label>
+            <label><input type="radio" name="defib" value="noShock"> No shock</label>
+            <label>No. of shocks: <input type="number" id="defibShocks" min="0"></label>
+          </div>
+        </fieldset>
+
+        <!-- Casualty Observations -->
+        <fieldset>
+          <legend>Casualty Observations</legend>
+          <table id="observations-table">
+            <thead>
+              <tr>
+                <th>Time</th><th>Pulse</th><th>BP</th><th>Breaths</th><th>GCS</th>
+                <th>Pupil L</th><th>Pupil R</th><th>React L</th><th>React R</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="time"></td>
+                <td><input type="number"></td>
+                <td><input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="number" min="1" max="15"></td>
+                <td><select><option></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td>
+                <td><select><option></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td>
+                <td><select><option></option><option>Yes</option><option>No</option></select></td>
+                <td><select><option></option><option>Yes</option><option>No</option></select></td>
+                <td><button type="button" class="btn-outline">Delete</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" id="add-observation" class="btn-small">+ Add Observation</button>
+        </fieldset>
+
+        <!-- Secondary Assessment (Body Diagrams) -->
+        <fieldset>
+          <legend>Secondary Assessment</legend>
+          <div class="row">
+            <div id="front-wrap">
+              <canvas id="diagram-front" width="250" height="400"></canvas>
+              <button type="button" onclick="frontDiagram.undo()">Undo</button>
+            </div>
+            <div id="back-wrap">
+              <canvas id="diagram-back" width="250" height="400"></canvas>
+              <button type="button" onclick="backDiagram.undo()">Undo</button>
+            </div>
+          </div>
+          <p><strong>Injury Codes:</strong> A – Abrasion, L – Laceration, B – Bruise, P – Puncture, S – Swelling, O – Other, Am – Amputation, C – Crush, T – Tenderness, D – Deformity, E – Embedded</p>
+          <label>Burns:
+            <input type="checkbox"> Full
+            <input type="checkbox"> Partial
+            <input type="checkbox"> Superficial
           </label>
-        </div>
-        <div class="row">
-          <label>Fluid/Air Injection Injury:
-            <input type="radio" name="fluidInjury" value="Yes"> Yes
+          <label>Fluid/Air Injection Injury: 
+            <input type="radio" name="fluidInjury" value="Yes"> Yes 
             <input type="radio" name="fluidInjury" value="No"> No
           </label>
-          <label>Breath Sounds:
-            <input type="checkbox" name="breathSounds" value="Clear"> Clear
-            <input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy
-            <input type="checkbox" name="breathSounds" value="Decreased"> Decreased
-            <input type="checkbox" name="breathSounds" value="Noisy"> Noisy
-          </label>
-        </div>
-      </fieldset>
+          <div>
+            Breath Sounds:
+            <label><input type="checkbox" name="breathSounds" value="Clear"> Clear</label>
+            <label><input type="checkbox" name="breathSounds" value="Wheezy"> Wheezy</label>
+            <label><input type="checkbox" name="breathSounds" value="Decreased"> Decreased</label>
+            <label><input type="checkbox" name="breathSounds" value="Noisy"> Noisy</label>
+          </div>
+        </fieldset>
 
-      <!-- Key Questions -->
-      <fieldset>
-        <legend>Key Questions</legend>
-        <div class="row">
+        <!-- Key Questions -->
+        <fieldset>
+          <legend>Key Questions</legend>
           <label>Remember what happened?
             <input type="radio" name="remember" value="Yes"> Yes
             <input type="radio" name="remember" value="No"> No
           </label>
           <label>Where does it hurt most? <input type="text" id="hurtMost"></label>
-          <label>Pain rating (1–10): <input type="number" id="painRating" min="1" max="10"></label>
+          <label>Pain rating (1–10) <input type="number" id="painRating" min="1" max="10"></label>
           <label>Deep breath?
             <input type="radio" name="deepBreath" value="Yes"> Yes
             <input type="radio" name="deepBreath" value="No"> No
           </label>
-        </div>
-      </fieldset>
+        </fieldset>
 
-      <!-- Allergies -->
-      <fieldset>
-        <legend>Allergies</legend>
-        <label><input type="radio" name="allergies" value="No"> No</label>
-        <label><input type="radio" name="allergies" value="Yes"> Yes</label>
-        <input type="text" id="allergyDetails" placeholder="List allergies">
-      </fieldset>
+        <!-- Allergies -->
+        <fieldset>
+          <legend>Allergies</legend>
+          <label><input type="radio" name="allergies" value="No"> No</label>
+          <label><input type="radio" name="allergies" value="Yes"> Yes</label>
+          <input type="text" id="allergyDetails" placeholder="Details">
+        </fieldset>
 
-      <!-- Previous Illness -->
-      <fieldset>
-        <legend>Previous Illness</legend>
-        <label><input type="checkbox" class="illness" value="Nil"> Nil</label>
-        <label><input type="checkbox" class="illness" value="Unknown"> Unknown</label>
-        <label><input type="checkbox" class="illness" value="Cardiac"> Cardiac</label>
-        <label><input type="checkbox" class="illness" value="Diabetes"> Diabetes</label>
-        <label><input type="checkbox" class="illness" value="Epilepsy"> Epilepsy</label>
-        <label><input type="checkbox" class="illness" value="Respiratory"> Respiratory</label>
-        <label><input type="checkbox" class="illness" value="Hypertension"> Hypertension</label>
-        <label><input type="checkbox" class="illness" value="Renal"> Renal</label>
-        <label><input type="checkbox" class="illness" value="Stroke"> Stroke</label>
-        <label><input type="checkbox" class="illness" value="Psychological"> Psychological</label>
-      </fieldset>
+        <!-- Previous Illness -->
+        <fieldset>
+          <legend>Previous Illness</legend>
+          <label><input type="checkbox" value="Nil"> Nil</label>
+          <label><input type="checkbox" value="Unknown"> Unknown</label>
+          <label><input type="checkbox" class="illness" value="Cardiac"> Cardiac</label>
+          <label><input type="checkbox" class="illness" value="Diabetes"> Diabetes</label>
+          <label><input type="checkbox" class="illness" value="Epilepsy"> Epilepsy</label>
+          <label><input type="checkbox" class="illness" value="Respiratory"> Respiratory</label>
+          <label><input type="checkbox" class="illness" value="Hypertension"> Hypertension</label>
+          <label><input type="checkbox" class="illness" value="Renal"> Renal</label>
+          <label><input type="checkbox" class="illness" value="Stroke"> Stroke</label>
+          <label><input type="checkbox" class="illness" value="Psychological"> Psychological</label>
+        </fieldset>
 
-      <!-- Medications -->
-      <fieldset>
-        <legend>Medications</legend>
-        <label>Regular medications <textarea id="regularMeds"></textarea></label>
-        <label>Medications taken today <textarea id="todayMeds"></textarea></label>
-      </fieldset>
+        <!-- Medications -->
+        <fieldset>
+          <legend>Medications</legend>
+          <label>Regular medications <textarea id="regularMeds"></textarea></label>
+          <label>Medications taken today <textarea id="todayMeds"></textarea></label>
+        </fieldset>
 
-      <!-- First Aid Treatment -->
-      <fieldset>
-        <legend>First Aid Treatment</legend>
-        <textarea id="treatment" placeholder="Treatment details"></textarea>
-      </fieldset>
+        <!-- First Aid Treatment -->
+        <fieldset>
+          <legend>First Aid Treatment</legend>
+          <textarea id="treatment"></textarea>
+        </fieldset>
 
-      <!-- Advanced Treatment -->
-      <fieldset>
-        <legend>Advanced Treatment</legend>
-        <label>Penthrox:
-          <input type="radio" id="penthYes"> Yes
-          <input type="radio" id="penthNo"> No
-          <input type="checkbox" id="penth3"> 3ml
-          <input type="checkbox" id="penth6"> 6ml
-        </label>
-        <label>Dose 1 Time: <input type="time" id="penthDose1"></label>
-        <label>Dose 2 Time: <input type="time" id="penthDose2"></label>
-        <label>Oxygen:
-          <input type="checkbox" id="oxygenYes"> Yes
-          <input type="checkbox" id="oxygen8"> 8ltrs
-          <input type="checkbox" id="oxygen15"> 15ltrs
-          <input type="checkbox" id="oxygen15Resus"> 15ltrs with Resus Bag
-          <input type="checkbox" id="oxygenNo"> No
-        </label>
-        <label>Ventolin MDI with Spacer:
-          <input type="radio" id="ventolinYes"> Yes
-          <input type="radio" id="ventolinNo"> No
-        </label>
-        <label>Ventolin Start Time: <input type="time" id="ventolinTime"></label>
-        <label>Fluid/Air Injection Injury Times:
-          Hand Unit Contacted: <input type="time" id="handUnitTime">
-          Aero Med Services Contacted: <input type="time" id="aeroTime">
-        </label>
-      </fieldset>
+        <!-- Advanced Treatment -->
+        <fieldset>
+          <legend>Advanced Treatment</legend>
+          <label>Penthrox:
+            <input type="checkbox" id="penthYes"> Yes
+            <input type="checkbox" id="penthNo"> No
+            <input type="checkbox" id="penth3"> 3ml
+            <input type="checkbox" id="penth6"> 6ml
+          </label>
+          <label>Dose 1 Time: <input type="time" id="penthDose1"></label>
+          <label>Dose 2 Time: <input type="time" id="penthDose2"></label>
+          <label>Oxygen:
+            <input type="checkbox" id="oxygenYes"> Yes
+            <input type="checkbox" id="oxygen8"> 8 ltrs
+            <input type="checkbox" id="oxygen15"> 15 ltrs
+            <input type="checkbox" id="oxygen15Resus"> 15 ltrs with Resus Bag & Reservoir
+            <input type="checkbox" id="oxygenNo"> No
+          </label>
+          <label>Ventolin MDI with Spacer:
+            <input type="checkbox" id="ventolinYes"> Yes
+            <input type="checkbox" id="ventolinNo"> No
+          </label>
+          <label>Start Time: <input type="time" id="ventolinTime"></label>
+          <label>Fluid/Air Injection Injury Times:</label>
+          <label>Hand Unit Contacted: <input type="time" id="handUnitTime"></label>
+          <label>Aero Med Services Contacted: <input type="time" id="aeroTime"></label>
+        </fieldset>
 
-      <!-- Evacuation -->
-      <fieldset>
-        <legend>Evacuation</legend>
-        <label><input type="checkbox" id="evacReturn"> Return to work after first aid</label>
-        <label><input type="checkbox" id="evacGP"> General Practitioner</label>
-        <label><input type="checkbox" id="evacHome"> Gone home</label>
-        <label><input type="checkbox" id="evacAmb"> Ambulance</label>
-        <label><input type="checkbox" id="evacHeli"> Helicopter</label>
-      </fieldset>
+        <!-- Evacuation -->
+        <fieldset>
+          <legend>Evacuation</legend>
+          <label><input type="checkbox" id="evacReturn"> Return to work after first aid</label>
+          <label><input type="checkbox" id="evacGP"> General Practitioner</label>
+          <label><input type="checkbox" id="evacHome"> Gone home</label>
+          <label><input type="checkbox" id="evacAmb"> Ambulance</label>
+          <label><input type="checkbox" id="evacHeli"> Helicopter</label>
+        </fieldset>
 
-      <!-- Signature -->
-      <fieldset>
-        <legend>Signature</legend>
-        <canvas id="signature-pad" width="300" height="150" style="border:1px solid #ccc"></canvas>
-        <div class="row">
+        <!-- Signature -->
+        <fieldset>
+          <legend>Signature</legend>
+          <canvas id="signature-pad" width="300" height="100"></canvas>
+          <div>
+            <button type="button" id="clear-signature">Clear Signature</button>
+          </div>
           <label>Signer Name <input type="text" id="signerName"></label>
-        </div>
-        <button type="button" id="clear-signature">Clear Signature</button>
-        <button type="submit">Save Report</button>
-      </fieldset>
+          <button type="submit">Save Report</button>
+        </fieldset>
 
-    </form>
-  </section>
+      </form>
+    </section>
 
-  <!-- ================= RECORDS SECTION ================= -->
-  <section id="records-section" style="display:none;">
-    <h2>Saved Reports</h2>
-    <ul id="records-list"></ul>
-  </section>
-
-  <section id="archived-section" style="display:none;">
-    <h2>Archived Reports</h2>
-    <ul id="archived-list"></ul>
-  </section>
+    <!-- Records Section -->
+    <section id="records-section" style="display:none">
+      <h2>Saved Reports</h2>
+      <ul id="records-list"></ul>
+      <h2>Archived Reports</h2>
+      <ul id="archived-list"></ul>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
