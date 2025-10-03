@@ -5,49 +5,63 @@
   <title>Casualty Assessment</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <header>
-    <h1>Casualty Assessment Report</h1>
+    <h1>Casualty Assessment</h1>
     <nav>
       <button id="btn-new" onclick="showForm()">New Report</button>
       <button id="btn-saved" onclick="showRecords()">Saved Reports</button>
-      <button id="btn-archived" onclick="showArchived()">Archived Reports</button>
+      <button id="btn-archived" onclick="showArchived()">Archived</button>
+      <span id="save-status"></span>
     </nav>
-    <div id="save-status"></div>
   </header>
 
   <!-- FORM SECTION -->
   <section id="form-section" style="display:none;">
     <form id="casualty-form">
 
-      <!-- Patient Info -->
+      <!-- Patient Details -->
       <fieldset>
-        <legend>Patient Info</legend>
+        <legend>Patient Details</legend>
         <div class="row">
-          <div class="field"><label for="patientName">Name</label><input id="patientName" type="text"></div>
-          <div class="field"><label for="dob">Date of Birth</label><input id="dob" type="date"></div>
-          <div class="field"><label for="gender">Gender</label><input id="gender" type="text"></div>
+          <div class="field"><label>Name <input id="patientName"></label></div>
+          <div class="field"><label>DOB <input type="date" id="dob"></label></div>
+          <div class="field"><label>Gender 
+            <select id="gender"><option></option><option>Male</option><option>Female</option><option>Other</option></select>
+          </label></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Home Address <input id="homeAddress"></label></div>
+          <div class="field"><label>Town <input id="town"></label></div>
+          <div class="field"><label>State <input id="state"></label></div>
+          <div class="field"><label>Postcode <input id="postcode"></label></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Employee No <input id="employeeNo"></label></div>
+          <div class="field"><label>Contractor <input id="contractor"></label></div>
+          <div class="field"><label>Occupation <input id="occupation"></label></div>
+          <div class="field"><label>Shift Start <input type="time" id="shiftStart"></label></div>
         </div>
       </fieldset>
 
-      <!-- Injury Details -->
+      <!-- Injury -->
       <fieldset>
-        <legend>Injury Details</legend>
+        <legend>Injury</legend>
         <div class="row">
-          <div class="field"><label for="injuryDate">Date</label><input id="injuryDate" type="date"></div>
-          <div class="field"><label for="injuryTime">Time</label><input id="injuryTime" type="time"></div>
-          <div class="field"><label for="injuryLocation">Location</label><input id="injuryLocation" type="text"></div>
+          <div class="field"><label>Date <input type="date" id="injuryDate"></label></div>
+          <div class="field"><label>Time <input type="time" id="injuryTime"></label></div>
+          <div class="field"><label>Location <input id="injuryLocation"></label></div>
         </div>
-      </fieldset>
-
-      <!-- History -->
-      <fieldset>
-        <legend>History</legend>
+        <div class="row"><div class="field full"><label>History <textarea id="history"></textarea></label></div></div>
         <div class="row">
-          <div class="field">
-            <label for="history">History of illness/injury</label>
-            <textarea id="history"></textarea>
+          <div class="field"><label>Recurring? 
+            <input type="radio" name="recurring" value="Yes" onchange="toggleRecurring(true)"> Yes
+            <input type="radio" name="recurring" value="No" checked onchange="toggleRecurring(false)"> No
+          </label></div>
+          <div class="field" id="recurringDateField" style="display:none;">
+            <label>Original Date <input type="date" id="recurringDate"></label>
           </div>
         </div>
       </fieldset>
@@ -56,10 +70,11 @@
       <fieldset>
         <legend>Primary Survey</legend>
         <div class="row">
-          <div class="field"><label for="response">Response</label><input id="response" type="text"></div>
-          <div class="field"><label for="airway">Airway</label><input id="airway" type="text"></div>
-          <div class="field"><label for="breathing">Breathing</label><input id="breathing" type="text"></div>
-          <div class="field"><label for="signsOfLife">Signs of Life</label><input id="signsOfLife" type="text"></div>
+          <div class="field"><label><input type="checkbox" id="danger"> Danger</label></div>
+          <div class="field"><label>Response <input id="response"></label></div>
+          <div class="field"><label>Airway <input id="airway"></label></div>
+          <div class="field"><label>Breathing <input id="breathing"></label></div>
+          <div class="field"><label>Signs of Life <input id="signsOfLife"></label></div>
         </div>
       </fieldset>
 
@@ -69,29 +84,81 @@
         <table id="observations-table">
           <thead>
             <tr>
-              <th>Time</th><th>Pulse</th><th>BP</th><th>Breaths</th><th>GCS</th>
-              <th>Pupil L</th><th>Pupil R</th><th>React L</th><th>React R</th><th></th>
+              <th>Time</th><th>Pulse</th><th>BP</th><th>Breaths</th>
+              <th>GCS</th><th>Pupil L</th><th>Pupil R</th><th>React L</th><th>React R</th><th></th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
-        <button type="button" onclick="addObservationRow()">Add Row</button>
+        <button type="button" onclick="addObservationRow()">Add Observation</button>
       </fieldset>
 
-      <!-- Body Diagrams -->
+      <!-- Secondary Survey -->
       <fieldset>
-        <legend>Body Diagrams</legend>
+        <legend>Secondary Survey</legend>
         <div class="row">
-          <div class="field" id="front-wrap">
-            <label>Front</label>
-            <canvas id="diagram-front" width="200" height="400"></canvas>
-            <button type="button" onclick="frontDiagram.undo()">Undo</button>
+          <div id="injury-key">
+            <strong>Injury Codes:</strong>
+            <ul>
+              <li>A - Abrasion</li><li>L - Laceration</li><li>B - Bruise</li>
+              <li>P - Puncture</li><li>S - Swelling</li><li>O - Other</li>
+              <li>Am - Amputation</li><li>C - Crush</li><li>T - Tenderness</li>
+              <li>D - Deformity</li><li>E - Entry/Exit</li>
+            </ul>
           </div>
-          <div class="field" id="back-wrap">
-            <label>Back</label>
-            <canvas id="diagram-back" width="200" height="400"></canvas>
-            <button type="button" onclick="backDiagram.undo()">Undo</button>
+          <div class="field">
+            <div id="front-wrap">
+              <canvas id="diagram-front" width="300" height="400"></canvas>
+              <button type="button" onclick="frontDiagram.undo()">Undo</button>
+            </div>
           </div>
+          <div class="field">
+            <div id="back-wrap">
+              <canvas id="diagram-back" width="300" height="400"></canvas>
+              <button type="button" onclick="backDiagram.undo()">Undo</button>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Questions -->
+      <fieldset>
+        <legend>Questions</legend>
+        <div class="row">
+          <div class="field"><label>Remember event? 
+            <input type="radio" name="remember" value="Yes"> Yes 
+            <input type="radio" name="remember" value="No"> No
+          </label></div>
+          <div class="field"><label>Where hurts most? <input id="hurtMost"></label></div>
+          <div class="field"><label>Pain rating (0-10) <input type="number" id="painRating" min="0" max="10"></label></div>
+          <div class="field"><label>Hurts to breathe deeply? 
+            <input type="radio" name="deepBreath" value="Yes"> Yes 
+            <input type="radio" name="deepBreath" value="No"> No
+          </label></div>
+        </div>
+      </fieldset>
+
+      <!-- Allergies / Illnesses / Meds -->
+      <fieldset>
+        <legend>Allergies / Illnesses / Meds</legend>
+        <div class="row">
+          <div class="field"><label>Allergies? 
+            <input type="radio" name="allergies" value="Yes"> Yes 
+            <input type="radio" name="allergies" value="No"> No
+          </label></div>
+          <div class="field full"><label>Details <input id="allergyDetails"></label></div>
+        </div>
+        <div class="row">
+          <div class="field full"><label>Illnesses (select all)<br>
+            <label><input type="checkbox" class="illness" value="Diabetes"> Diabetes</label>
+            <label><input type="checkbox" class="illness" value="Asthma"> Asthma</label>
+            <label><input type="checkbox" class="illness" value="Epilepsy"> Epilepsy</label>
+            <label><input type="checkbox" class="illness" value="Heart"> Heart</label>
+          </label></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Regular Meds <input id="regularMeds"></label></div>
+          <div class="field"><label>Meds Today <input id="todayMeds"></label></div>
         </div>
       </fieldset>
 
@@ -99,7 +166,7 @@
       <fieldset>
         <legend>Treatment</legend>
         <div class="row">
-          <div class="field"><label for="treatment">Notes</label><textarea id="treatment"></textarea></div>
+          <div class="field full"><label>Treatment Given <textarea id="treatment"></textarea></label></div>
         </div>
       </fieldset>
 
@@ -108,21 +175,31 @@
         <legend>Advanced Treatment</legend>
         <div class="row">
           <div class="field"><label><input type="checkbox" id="penthYes"> Penthrox Given</label></div>
-          <div class="field"><label><input type="checkbox" id="oxygenYes"> Oxygen Given</label></div>
-          <div class="field"><label><input type="checkbox" id="ventolinYes"> Ventolin Given</label></div>
+          <div class="field"><label><input type="checkbox" id="penth3"> 3 min</label></div>
+          <div class="field"><label><input type="checkbox" id="penth6"> 6 min</label></div>
+          <div class="field"><label><input type="checkbox" id="penthNo"> None</label></div>
+          <div class="field"><label>Dose 1 <input id="penthDose1"></label></div>
+          <div class="field"><label>Dose 2 <input id="penthDose2"></label></div>
         </div>
         <div class="row">
-          <div class="field"><label for="penthDose1">Penthrox Dose 1</label><input id="penthDose1" type="text"></div>
-          <div class="field"><label for="penthDose2">Penthrox Dose 2</label><input id="penthDose2" type="text"></div>
+          <div class="field"><label><input type="checkbox" id="oxygenYes"> Oxygen Given</label></div>
+          <div class="field"><label><input type="checkbox" id="oxygen8"> 8L</label></div>
+          <div class="field"><label><input type="checkbox" id="oxygen15"> 15L</label></div>
+          <div class="field"><label><input type="checkbox" id="oxygen15Resus"> 15L Resus</label></div>
+          <div class="field"><label><input type="checkbox" id="oxygenNo"> None</label></div>
         </div>
-      </fieldset>
-
-      <!-- Evacuation -->
-      <fieldset>
-        <legend>Evacuation</legend>
+        <div class="row">
+          <div class="field"><label><input type="checkbox" id="ventolinYes"> Ventolin Given</label></div>
+          <div class="field"><label><input type="checkbox" id="ventolinNo"> None</label></div>
+          <div class="field"><label>Time <input id="ventolinTime" type="time"></label></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Hand Unit Time <input id="handUnitTime" type="time"></label></div>
+          <div class="field"><label>Aero Time <input id="aeroTime" type="time"></label></div>
+        </div>
         <div class="row">
           <div class="field"><label><input type="checkbox" id="evacReturn"> Return to Work</label></div>
-          <div class="field"><label><input type="checkbox" id="evacGP"> To GP</label></div>
+          <div class="field"><label><input type="checkbox" id="evacGP"> GP</label></div>
           <div class="field"><label><input type="checkbox" id="evacHome"> Home</label></div>
           <div class="field"><label><input type="checkbox" id="evacAmb"> Ambulance</label></div>
           <div class="field"><label><input type="checkbox" id="evacHeli"> Helicopter</label></div>
@@ -133,11 +210,10 @@
       <fieldset>
         <legend>Signature</legend>
         <div class="row">
-          <div class="field">
-            <canvas id="signature-pad" width="300" height="120"></canvas>
+          <canvas id="signature-pad"></canvas>
+          <div>
             <button type="button" id="clear-signature">Clear</button>
-            <label for="signerName">Name</label>
-            <input id="signerName" type="text">
+            <label>Name <input id="signerName"></label>
           </div>
         </div>
       </fieldset>
@@ -146,18 +222,14 @@
     </form>
   </section>
 
-  <!-- SAVED RECORDS -->
+  <!-- RECORDS -->
   <section id="records-section" style="display:block;">
-    <h2>Saved Reports</h2>
     <ul id="records-list"></ul>
   </section>
 
-  <!-- ARCHIVED RECORDS -->
+  <!-- ARCHIVED -->
   <section id="archived-section" style="display:none;">
-    <h2>Archived Reports</h2>
     <ul id="archived-list"></ul>
   </section>
-
-  <script src="script.js"></script>
 </body>
 </html>
