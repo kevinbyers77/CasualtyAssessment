@@ -8,6 +8,9 @@ header {
   background: #003366;
   color: #fff;
   padding: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 header h1 {
@@ -24,7 +27,7 @@ nav button {
 }
 
 nav button.active-tab {
-  background-color: #555;   /* muted highlight */
+  background-color: #555;
   color: #fff;
   font-weight: bold;
 }
@@ -35,34 +38,25 @@ form {
   padding: 1em;
 }
 
-label {
-  margin: 0.5em 0;
-}
-
 fieldset {
   border: 1px solid #ccc;
   padding: 1em;
   margin: 1em 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1em;
+  align-items: start;
 }
 
 legend {
   font-weight: bold;
+  grid-column: 1 / -1;
 }
 
-textarea {
-  width: 100%;
-  height: 80px;
-}
-
-/* ======================
-   Layout helpers
-   ====================== */
-
-/* Group rows of inputs */
 .row {
   display: flex;
   gap: 1em;
-  margin-bottom: 0.5em;
+  flex-wrap: wrap;
 }
 
 .row label {
@@ -71,38 +65,30 @@ textarea {
   flex-direction: column;
 }
 
-/* Grid inside fieldsets */
-fieldset {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1em;
+label {
+  margin: 0.25em 0;
+}
+
+textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.inline-input {
+  display: flex;
+  gap: 0.5em;
   align-items: center;
 }
 
-/* Make sure single labels don’t stretch full width */
-fieldset > label {
-  grid-column: span 1;
-}
-
-/* For questions with yes/no radios */
 .radio-group {
   display: flex;
   gap: 1em;
   align-items: center;
-}
-
-/* For "Key Questions" tighter layout */
-.key-questions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 1em;
-  align-items: center;
-}
-
-.key-questions label {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
 }
 
 /* ======================
@@ -124,7 +110,7 @@ fieldset > label {
 }
 
 /* ======================
-   Record lists
+   Records
    ====================== */
 #records-list,
 #archived-list {
@@ -137,15 +123,15 @@ fieldset > label {
   border-bottom: 1px solid #ddd;
   padding: 0.5em;
   display: flex;
-  justify-content: flex-start;
+  gap: 0.5em;
+  flex-wrap: wrap;
   align-items: center;
 }
 
 /* ======================
-   Buttons general
+   Buttons
    ====================== */
 button {
-  margin-left: 0.5em;
   padding: 0.3em 0.8em;
   border: none;
   border-radius: 4px;
@@ -158,7 +144,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Button colors */
 .btn-pdf {
   background-color: #336699;
   color: white;
@@ -177,7 +162,7 @@ button:disabled {
 .btn-delete {
   background-color: #b33;
   color: white;
-  margin-left: 1.5em;   /* extra spacing from others */
+  margin-left: auto;
 }
 
 .btn-clear {
@@ -198,51 +183,16 @@ button:disabled {
 }
 
 /* ======================
-   Recurring toggle
+   Diagrams
    ====================== */
-#recurringDateField {
-  margin-top: 0.5em;
+.injury-diagrams {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* ======================
-   Secondary Assessment diagrams
-   ====================== */
-.injury-section{
-  display:flex;
-  gap:2rem;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
-.injury-key{
-  flex:1 1 240px;
-}
-.injury-key ul{
-  margin:.25rem 0 0 1rem;
-}
-.injury-diagrams{
-  flex:2 1 480px;
-  display:flex;
-  gap:2rem;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-.diagram{
-  position:relative;
-  text-align:center;
-}
-.diagram canvas{
-  display:block;
-  border:1px solid #ccc;
-  background:#fff;
-}
-.diagram-controls{
-  margin-top:.4rem;
-}
-.diagram-label{
-  margin-top:.25rem;
-  color:#555;
-  font-size:.9rem;
-}
-.injury-extra{
-  margin-top:1rem;
+.diagram canvas {
+  border: 1px solid #ccc;
+  background: #fff;
 }
