@@ -54,6 +54,10 @@ textarea {
   height: 80px;
 }
 
+/* ======================
+   Layout helpers
+   ====================== */
+
 /* Group rows of inputs */
 .row {
   display: flex;
@@ -67,7 +71,43 @@ textarea {
   flex-direction: column;
 }
 
-/* Signature */
+/* Grid inside fieldsets */
+fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1em;
+  align-items: center;
+}
+
+/* Make sure single labels don’t stretch full width */
+fieldset > label {
+  grid-column: span 1;
+}
+
+/* For questions with yes/no radios */
+.radio-group {
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
+/* For "Key Questions" tighter layout */
+.key-questions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1em;
+  align-items: center;
+}
+
+.key-questions label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* ======================
+   Signature
+   ====================== */
 #signature-pad {
   border: 1px solid #000;
   margin: 0.5em 0;
@@ -77,7 +117,15 @@ textarea {
   display: block;
 }
 
-/* Record lists */
+.button-row {
+  margin-top: 0.5em;
+  display: flex;
+  gap: 1em;
+}
+
+/* ======================
+   Record lists
+   ====================== */
 #records-list,
 #archived-list {
   list-style: none;
@@ -93,7 +141,9 @@ textarea {
   align-items: center;
 }
 
-/* Buttons general */
+/* ======================
+   Buttons general
+   ====================== */
 button {
   margin-left: 0.5em;
   padding: 0.3em 0.8em;
@@ -139,26 +189,23 @@ button:disabled {
   background-color: #666;
 }
 
-/* Save status */
+/* ======================
+   Save status
+   ====================== */
 #save-status {
   margin-left: 1em;
   font-size: 0.9em;
 }
 
-/* Recurring toggle */
+/* ======================
+   Recurring toggle
+   ====================== */
 #recurringDateField {
   margin-top: 0.5em;
 }
 
-/* Signature section buttons */
-.button-row {
-  margin-top: 0.5em;
-  display: flex;
-  gap: 1em;
-}
-
 /* ======================
-   NEW: Secondary Assessment diagrams
+   Secondary Assessment diagrams
    ====================== */
 .injury-section{
   display:flex;
@@ -198,34 +245,4 @@ button:disabled {
 }
 .injury-extra{
   margin-top:1rem;
-}
-
-
-/* General section layout */
-fieldset {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1em;
-  align-items: center;
-}
-
-/* For questions with yes/no radios */
-.radio-group {
-  display: flex;
-  gap: 1em;
-  align-items: center;
-}
-
-/* For "Key Questions" tighter layout */
-.key-questions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 1em;
-  align-items: center;
-}
-
-.key-questions label {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
 }
