@@ -295,34 +295,48 @@ function editReport(id){
  * LISTS / ACTIONS
  ***********************/
 function loadRecords(){
-  const active=document.getElementById("records-list");
-  const arch=document.getElementById("archived-list");
-  active.innerHTML=""; arch.innerHTML="";
+  const active = document.getElementById("records-list");
+  const arch = document.getElementById("archived-list");
+  active.innerHTML = "";
+  arch.innerHTML = "";
 
-  const tx=db.transaction("reports","readonly");
-  tx.objectStore("reports").openCursor().onsuccess=(e)=>{
-    const cursor=e.target.result; if(!cursor) return;
-    const r=cursor.value;
+  const tx = db.transaction("reports","readonly");
+  tx.objectStore("reports").openCursor().onsuccess = (e)=>{
+    const cursor = e.target.result;
+    if(!cursor) return;
+    const r = cursor.value;
 
-    const li=document.createElement("li");
-    li.textContent=`${r.patientName||"(no name)"} (Created: ${r.created})`;
+    const li = document.createElement("li");
+    li.textContent = `${r.patientName || "(no name)"} (Created: ${r.created})`;
 
-    const btnPDF=document.createElement("button");
-    btnPDF.className="btn-pdf"; btnPDF.textContent="Export PDF"; btnPDF.onclick=()=>exportPDF(r);
+    const btnPDF = document.createElement("button");
+    btnPDF.className = "btn-pdf";
+    btnPDF.textContent = "Export PDF";
+    btnPDF.onclick = ()=>exportPDF(r);
 
-    const btnEdit=document.createElement("button");
-    btnEdit.className="btn-edit"; btnEdit.textContent="Edit"; btnEdit.onclick=()=>editReport(r.id);
+    const btnEdit = document.createElement("button");
+    btnEdit.className = "btn-edit";
+    btnEdit.textContent = "Edit";
+    btnEdit.onclick = ()=>editReport(r.id);
 
-    const btnArch=document.createElement("button");
-    btnArch.className="btn-archive"; btnArch.textContent=r.archived?"Unarchive":"Archive";
-    btnArch.onclick=()=>toggleArchive(r.id,!r.archived);
+    const btnArch = document.createElement("button");
+    btnArch.className = "btn-archive";
+    btnArch.textContent = r.archived ? "Unarchive" : "Archive";
+    btnArch.onclick = ()=>toggleArchive(r.id,!r.archived);
 
-    const btnDel=document.createElement("button");
-    btnDel.className="btn-delete"; btnDel.textContent="Delete";
-    btnDel.onclick=()=>{if(confirm("Delete this report?")) deleteReport(r.id);};
+    const btnDel = document.createElement("button");
+    btnDel.className = "btn-delete";
+    btnDel.textContent = "Delete";
+    btnDel.onclick = ()=>{ if(confirm("Delete this report?")) deleteReport(r.id); };
 
-    li.append(btnPDF,btnEdit,btnArch,btnDel);
-    (r.archived?arch:active).appendChild(li);
+    li.append(btnPDF, btnEdit, btnArch, btnDel);
+
+    if(r.archived){
+      arch.appendChild(li);
+    } else {
+      active.appendChild(li);
+    }
+
     cursor.continue();
   };
 }
