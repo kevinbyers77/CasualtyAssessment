@@ -359,4 +359,51 @@ function loadRecords(){
     cursor.continue();
   };
 }
-function toggle
+function toggleArchive(id, toArchive){
+  const tx = db.transaction("reports","readwrite");
+  const store = tx.objectStore("reports");
+  store.get(id).onsuccess = (e)=>{
+    const r = e.target.result; if(!r) return;
+    r.archived = toArchive;
+    store.put(r).onsuccess = loadRecords;
+  };
+}
+
+function deleteReport(id){
+  const tx = db.transaction("reports","readwrite");
+  tx.objectStore("reports").delete(id).onsuccess = loadRecords;
+}
+
+/***********************
+ * NAVIGATION
+ ***********************/
+function showForm(){
+  if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  document.getElementById("form-section").style.display="block";
+  document.getElementById("records-section").style.display="none";
+  document.getElementById("archived-section").style.display="none";
+  setActiveTab("btn-new");
+  updateSaveStatus();
+}
+
+function showRecords(){
+  if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  document.getElementById("form-section").style.display="none";
+  document.getElementById("records-section").style.display="block";
+  document.getElementById("archived-section").style.display="none";
+  setActiveTab("btn-saved");
+  updateSaveStatus();
+}
+
+function showArchived(){
+  if(isDirty && !confirm("You have unsaved changes. Leave without saving?")) return;
+  document.getElementById("form-section").style.display="none";
+  document.getElementById("records-section").style.display="none";
+  document.getElementById("archived-section").style.display="block";
+  setActiveTab("btn-archived");
+  updateSaveStatus();
+}
+
+// Initial view
+setActiveTab("btn-saved");
+updateSaveStatus();
